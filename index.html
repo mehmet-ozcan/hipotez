@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hipotez</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-bg="charcoal">
+  <header class="topbar">
+    <div class="brand">
+      <img class="logo-img" src="assets/logo2.png" alt="Hipotez" draggable="false" />
+      <div class="brand-text">
+        <h1>Hipotez</h1>
+        <span class="brand-sub" data-i18n="appSub">Akademik Proje Planlayıcı</span>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn-lg" id="open-settings" title="Ayarlar" data-i18n-title="settingsTitle">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="board">
+    <section class="column" data-col="ongoing">
+      <header class="col-head">
+        <h2 data-i18n="colOngoing">Üzerinde Çalışılan</h2>
+        <button class="add-btn" data-add="ongoing" data-i18n-title="addProject" title="Yeni proje ekle">+</button>
+      </header>
+      <div class="col-body" id="col-ongoing"></div>
+    </section>
+
+    <section class="column" data-col="future">
+      <header class="col-head">
+        <h2 data-i18n="colFuture">Gelecek Projeler</h2>
+        <button class="add-btn" data-add="future" data-i18n-title="addProject" title="Yeni proje ekle">+</button>
+      </header>
+      <div class="col-body" id="col-future"></div>
+    </section>
+
+    <section class="column" data-col="completed">
+      <header class="col-head">
+        <h2 data-i18n="colCompleted">Bitmiş Projeler</h2>
+        <button class="add-btn" data-add="completed" data-i18n-title="addProject" title="Yeni proje ekle">+</button>
+      </header>
+      <div class="col-body" id="col-completed"></div>
+    </section>
+  </main>
+
+  <footer class="appfoot">
+    <span id="foot-text"></span>
+  </footer>
+
+  <!-- Project modal -->
+  <div class="modal-backdrop hidden" id="modal">
+    <div class="modal">
+      <header class="modal-head">
+        <h3 id="modal-title" data-i18n="modalNew">Yeni Proje</h3>
+        <button class="icon-btn" id="modal-close" title="Kapat">×</button>
+      </header>
+      <div class="modal-body">
+        <label>
+          <span data-i18n="fName">Proje Adı</span>
+          <input type="text" id="f-name" data-i18n-ph="fNamePh" placeholder="Örn. İşsizlik histerezisi" />
+        </label>
+        <label>
+          <span data-i18n="fCoauthors">Ortak Yazarlar</span>
+          <input type="text" id="f-coauthors" data-i18n-ph="fCoauthorsPh" placeholder="Virgülle ayırın" />
+        </label>
+        <label>
+          <span data-i18n="fType">Proje Tipi</span>
+          <select id="f-type"></select>
+        </label>
+        <label>
+          <span data-i18n="fStage">Aşama</span>
+          <select id="f-stage"></select>
+        </label>
+        <label>
+          <span data-i18n="fSection">Bölüm</span>
+          <select id="f-section">
+            <option value="ongoing" data-i18n="colOngoing">Üzerinde Çalışılan</option>
+            <option value="future" data-i18n="colFuture">Gelecek Projeler</option>
+            <option value="completed" data-i18n="colCompleted">Bitmiş Projeler</option>
+          </select>
+        </label>
+        <label>
+          <span data-i18n="fFolder">Klasör</span>
+          <div class="folder-row">
+            <input type="text" id="f-folder" data-i18n-ph="fFolderNone" placeholder="Henüz seçilmedi" readonly />
+            <button class="secondary" id="f-folder-pick" data-i18n="fFolderPick">Seç…</button>
+            <button class="secondary" id="f-folder-clear" title="Temizle">✕</button>
+          </div>
+        </label>
+        <label>
+          <span data-i18n="fColor">Kart Rengi</span>
+          <div class="color-chips" id="f-color-chips"></div>
+        </label>
+      </div>
+      <footer class="modal-foot">
+        <button class="ghost danger" id="modal-delete" data-i18n="btnDelete">Sil</button>
+        <div class="spacer"></div>
+        <button class="ghost" id="modal-cancel" data-i18n="btnCancel">Vazgeç</button>
+        <button class="primary" id="modal-save" data-i18n="btnSave">Kaydet</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Settings modal -->
+  <div class="modal-backdrop hidden" id="settings-modal">
+    <div class="modal">
+      <header class="modal-head">
+        <h3 data-i18n="settingsTitle">Ayarlar</h3>
+        <button class="icon-btn" id="settings-close" title="Kapat">×</button>
+      </header>
+      <div class="modal-body">
+        <label>
+          <span data-i18n="settingsFont">Yazı Boyutu</span>
+          <div class="range-row">
+            <input type="range" id="s-font" min="0.9" max="1.6" step="0.05" />
+            <span class="range-val" id="s-font-val">100%</span>
+          </div>
+        </label>
+        <label>
+          <span data-i18n="settingsBg">Arka Plan Rengi</span>
+          <div class="bg-chips" id="s-bg-chips"></div>
+        </label>
+        <label>
+          <span data-i18n="settingsLang">Dil</span>
+          <select id="s-lang">
+            <option value="tr">Türkçe</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+
+        <div class="section-divider"></div>
+
+        <div class="sync-block">
+          <div class="sync-head">
+            <span class="sync-title" data-i18n="syncTitle">Senkronizasyon</span>
+            <span class="sync-badge" id="s-sync-badge"></span>
+          </div>
+          <div class="sync-hint" data-i18n="syncHint">
+            Veri klasörünü Google Drive / OneDrive / Dropbox içindeki bir klasöre yönlendir; tüm bilgisayarlarında aynı klasörü seç, otomatik senkronize olsun.
+          </div>
+          <div class="sync-path" id="s-sync-path"></div>
+          <div class="sync-actions">
+            <button class="secondary" id="s-pick-folder" data-i18n="syncPick">Veri Klasörünü Seç…</button>
+            <button class="ghost" id="s-clear-folder" data-i18n="syncClear">Yerel Klasöre Dön</button>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="sync-block">
+          <div class="sync-head">
+            <span class="sync-title" data-i18n="backupTitle">Yedekleme</span>
+          </div>
+          <div class="sync-hint" data-i18n="backupHint">
+            Tüm projeleri ve ayarları tek bir JSON dosyasına aktar veya bir yedekten içe aktar.
+          </div>
+          <div class="sync-actions">
+            <button class="secondary" id="s-export" data-i18n="backupExport">Dışa Aktar…</button>
+            <button class="secondary" id="s-import" data-i18n="backupImport">İçe Aktar…</button>
+          </div>
+        </div>
+      </div>
+      <footer class="modal-foot">
+        <div class="spacer"></div>
+        <button class="primary" id="settings-done" data-i18n="btnClose">Kapat</button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+out/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Local Claude settings
+.claude/
+
+# Local user data (should never land in userData anyway, but just in case)
+projects.json
+settings.json
+sync-config.json
+
+# Env
+.env
+.env.local

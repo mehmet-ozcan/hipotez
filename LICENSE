@@ -1,0 +1,41 @@
+Hipotez — Proprietary License
+Copyright (c) 2026 Mehmet Özcan. All Rights Reserved.
+
+The source code and associated files in this repository are made publicly
+visible for transparency and for end-user download of the compiled
+application. However, the following restrictions apply:
+
+1. NO MODIFICATION
+   You may not modify, adapt, translate, reverse engineer, decompile, or
+   create derivative works based on the source code or the compiled
+   application, in whole or in part.
+
+2. NO REDISTRIBUTION
+   You may not redistribute, sublicense, sell, rent, lease, or otherwise
+   transfer the source code or the compiled application, in whole or in
+   part, without prior written permission from the copyright holder.
+
+3. PERMITTED USE
+   You may:
+   - View the source code for personal, non-commercial study.
+   - Download and install the compiled application ("Hipotez Setup
+     x.y.z.exe") from the official GitHub Releases page of this repository.
+   - Use the installed application for personal or academic purposes.
+
+4. NO WARRANTY
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+   IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+   DEALINGS IN THE SOFTWARE.
+
+5. CONTACT
+   For licensing inquiries or permission requests, contact:
+   Mehmet Özcan — https://www.ozcanmehmet.com
+
+Forking this repository on GitHub is permitted only for the purpose of
+submitting contributions back to the original project via Pull Requests,
+at the sole discretion of the copyright holder. Any fork used for
+independent distribution or modification outside this scope is prohibited.
