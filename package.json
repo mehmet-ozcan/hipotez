@@ -8,13 +8,13 @@
     "url": "https://www.ozcanmehmet.com"
   },
   "license": "SEE LICENSE IN LICENSE",
-  "homepage": "https://github.com/<mehmet-ozcan>/hipotez#readme",
+  "homepage": "https://github.com/mehmet-ozcan/hipotez#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/<mehmet-ozcan>/hipotez.git"
+    "url": "https://github.com/mehmet-ozcan/hipotez.git"
   },
   "bugs": {
-    "url": "https://github.com/<mehmet-ozcan>/hipotez/issues"
+    "url": "https://github.com/mehmet-ozcan/hipotez/issues"
   },
   "keywords": [
     "academic",
