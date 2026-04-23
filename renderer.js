@@ -62,8 +62,16 @@ const I18N = {
     fNotesPh: 'Serbest metin…',
     fTargetDate: 'Hedef Tarih',
     cardTargetOverdue: 'Gecikmiş',
+    cardStartLabel: 'Başl.',
+    cardTargetLabel: 'Hedef',
+    popStartDate: 'Başlangıç Tarihi',
+    popTargetDate: 'Hedef Tarih',
+    popNotes: 'Notlar',
+    btnClear: 'Temizle',
+    btnDone: 'Tamam',
     metaCreated: 'Oluşturuldu',
     metaUpdated: 'Son güncelleme',
+    metaStart: 'Başlangıç',
     statsOngoing: 'Devam',
     statsFuture: 'Gelecek',
     statsCompleted: 'Bitmiş',
@@ -150,8 +158,16 @@ const I18N = {
     fNotesPh: 'Free text…',
     fTargetDate: 'Target Date',
     cardTargetOverdue: 'Overdue',
+    cardStartLabel: 'Start',
+    cardTargetLabel: 'Target',
+    popStartDate: 'Start Date',
+    popTargetDate: 'Target Date',
+    popNotes: 'Notes',
+    btnClear: 'Clear',
+    btnDone: 'Done',
     metaCreated: 'Created',
     metaUpdated: 'Last updated',
+    metaStart: 'Start',
     statsOngoing: 'Ongoing',
     statsFuture: 'Future',
     statsCompleted: 'Done',
@@ -401,6 +417,9 @@ function renderCard(p) {
     )
   );
 
+  const extras = renderCardExtras(p);
+  if (extras) card.append(extras);
+
   card.append(
     el(
       'div',
@@ -410,54 +429,75 @@ function renderCard(p) {
     )
   );
 
-  const extras = renderCardExtras(p);
-  if (extras) card.append(extras);
-
   return card;
 }
 
 function renderCardExtras(p) {
-  const pills = [];
-
-  if (p.targetDate) {
-    const status = targetDateStatus(p.targetDate);
-    const cls =
-      status === 'overdue'
-        ? 'extra-pill target-overdue'
-        : status === 'soon'
-        ? 'extra-pill target-soon'
-        : 'extra-pill';
-    const pill = el(
-      'span',
-      {
-        class: cls,
-        title:
-          status === 'overdue'
-            ? t('cardTargetOverdue')
-            : formatDate(p.targetDate)
-      },
-      targetIconSvg(),
-      document.createTextNode(formatDate(p.targetDate))
-    );
-    pills.push(pill);
-  }
-
-  if (p.notes && p.notes.trim()) {
-    const pill = el(
-      'span',
-      {
-        class: 'extra-pill',
-        title: p.notes.length > 160 ? p.notes.slice(0, 160) + '…' : p.notes
-      },
-      notesIconSvg()
-    );
-    pills.push(pill);
-  }
-
-  if (!pills.length) return null;
   const row = el('div', { class: 'card-extras' });
-  for (const pill of pills) row.append(pill);
+
+  // Start date pill — always shown (auto-populated on creation, editable)
+  const startIso =
+    p.startDate ||
+    (p.createdAt
+      ? p.createdAt.slice(0, 10)
+      : new Date().toISOString().slice(0, 10));
+  row.append(makeDatePill('start', startIso, p));
+
+  // Target date pill — only if set (status-colored)
+  if (p.targetDate) row.append(makeDatePill('target', p.targetDate, p));
+
+  // Notes pill — only if project has notes
+  if (p.notes && p.notes.trim()) row.append(makeNotesPill(p));
+
   return row;
+}
+
+function makeDatePill(kind, iso, project) {
+  const labelKey = kind === 'start' ? 'cardStartLabel' : 'cardTargetLabel';
+  const iconFn = kind === 'start' ? calendarIconSvg : flagIconSvg;
+  let cls = 'extra-pill pill-btn';
+  let titleText = `${t(labelKey)}: ${formatDate(iso)}`;
+  if (kind === 'target') {
+    const status = targetDateStatus(iso);
+    if (status === 'overdue') {
+      cls += ' target-overdue';
+      titleText = `${t('cardTargetOverdue')} · ${formatDate(iso)}`;
+    } else if (status === 'soon') {
+      cls += ' target-soon';
+    }
+  }
+  return el(
+    'button',
+    {
+      class: cls,
+      type: 'button',
+      title: titleText,
+      onclick: (e) => {
+        e.stopPropagation();
+        openDatePopover(e.currentTarget, kind, project);
+      }
+    },
+    iconFn(),
+    document.createTextNode(formatDate(iso))
+  );
+}
+
+function makeNotesPill(project) {
+  const preview = (project.notes || '').trim();
+  const short = preview.length > 160 ? preview.slice(0, 160) + '…' : preview;
+  return el(
+    'button',
+    {
+      class: 'extra-pill pill-btn',
+      type: 'button',
+      title: short,
+      onclick: (e) => {
+        e.stopPropagation();
+        openNotesPopover(e.currentTarget, project);
+      }
+    },
+    notesIconSvg()
+  );
 }
 
 function targetDateStatus(iso) {
@@ -500,7 +540,7 @@ function formatDateTime(iso) {
   }
 }
 
-function targetIconSvg() {
+function calendarIconSvg() {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('viewBox', '0 0 24 24');
   svg.setAttribute('fill', 'none');
@@ -518,6 +558,20 @@ function targetIconSvg() {
   return svg;
 }
 
+function flagIconSvg() {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '2');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  p.setAttribute('d', 'M4 22V4h13l-2 4 2 4H4');
+  svg.append(p);
+  return svg;
+}
+
 function notesIconSvg() {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('viewBox', '0 0 24 24');
@@ -530,6 +584,166 @@ function notesIconSvg() {
   path.setAttribute('d', 'M4 6h16M4 12h16M4 18h10');
   svg.append(path);
   return svg;
+}
+
+// ----------------- Popover (date/notes) -----------------
+function handlePopoverOutside(e) {
+  const pop = document.querySelector('.popover');
+  if (!pop) return;
+  if (!pop.contains(e.target)) closePopover();
+}
+
+function handlePopoverKey(e) {
+  if (e.key === 'Escape') closePopover();
+}
+
+async function closePopover() {
+  const pop = document.querySelector('.popover');
+  if (!pop) return;
+  if (typeof pop._onBeforeClose === 'function') {
+    try {
+      await pop._onBeforeClose();
+    } catch (_) {}
+  }
+  pop.remove();
+  document.removeEventListener('mousedown', handlePopoverOutside, true);
+  document.removeEventListener('keydown', handlePopoverKey);
+}
+
+function positionPopover(pop, anchor) {
+  document.body.append(pop);
+  const ar = anchor.getBoundingClientRect();
+  const pr = pop.getBoundingClientRect();
+  let top = ar.bottom + 6;
+  let left = ar.left;
+  if (left + pr.width > window.innerWidth - 8) {
+    left = Math.max(8, window.innerWidth - pr.width - 8);
+  }
+  if (top + pr.height > window.innerHeight - 8) {
+    const above = ar.top - pr.height - 6;
+    if (above >= 8) top = above;
+    else top = Math.max(8, window.innerHeight - pr.height - 8);
+  }
+  pop.style.top = top + 'px';
+  pop.style.left = left + 'px';
+}
+
+function openDatePopover(anchor, kind, project) {
+  closePopover();
+  const field = kind === 'start' ? 'startDate' : 'targetDate';
+  const labelKey = kind === 'start' ? 'popStartDate' : 'popTargetDate';
+  const current = project[field] || '';
+
+  const input = el('input', { type: 'date' });
+  input.value = current;
+
+  const commit = async (newValue) => {
+    const normalized = newValue || null;
+    if (normalized === (project[field] || null)) return;
+    const found = findProject(project.id);
+    if (!found) return;
+    found.project[field] = normalized;
+    found.project.updatedAt = new Date().toISOString();
+    await persistProjects();
+    render();
+  };
+
+  input.addEventListener('change', async () => {
+    await commit(input.value);
+    closePopover();
+  });
+
+  const actions = el('div', { class: 'pop-actions' });
+  if (kind === 'target' && current) {
+    actions.append(
+      el('button', {
+        class: 'ghost',
+        type: 'button',
+        text: t('btnClear'),
+        onclick: async () => {
+          await commit('');
+          closePopover();
+        }
+      })
+    );
+  }
+  actions.append(
+    el('button', {
+      class: 'primary',
+      type: 'button',
+      text: t('btnDone'),
+      onclick: () => closePopover()
+    })
+  );
+
+  const pop = el(
+    'div',
+    { class: 'popover date-popover' },
+    el('div', { class: 'pop-title', text: t(labelKey) }),
+    input,
+    actions
+  );
+
+  positionPopover(pop, anchor);
+
+  setTimeout(() => {
+    input.focus();
+    if (typeof input.showPicker === 'function') {
+      try { input.showPicker(); } catch (_) {}
+    }
+  }, 30);
+
+  document.addEventListener('mousedown', handlePopoverOutside, true);
+  document.addEventListener('keydown', handlePopoverKey);
+}
+
+function openNotesPopover(anchor, project) {
+  closePopover();
+
+  const textarea = el('textarea', {
+    spellcheck: 'true',
+    placeholder: t('fNotesPh')
+  });
+  textarea.value = project.notes || '';
+
+  const saveIfChanged = async () => {
+    if (textarea.value === (project.notes || '')) return;
+    const found = findProject(project.id);
+    if (!found) return;
+    found.project.notes = textarea.value;
+    found.project.updatedAt = new Date().toISOString();
+    await persistProjects();
+    render();
+  };
+
+  const pop = el(
+    'div',
+    { class: 'popover notes-popover' },
+    el(
+      'div',
+      { class: 'pop-head' },
+      el('span', { class: 'pop-title-inline', text: t('popNotes') }),
+      el('button', {
+        class: 'icon-btn',
+        type: 'button',
+        title: t('btnClose'),
+        text: '×',
+        onclick: () => closePopover()
+      })
+    ),
+    textarea
+  );
+  pop._onBeforeClose = saveIfChanged;
+
+  positionPopover(pop, anchor);
+
+  setTimeout(() => {
+    textarea.focus();
+    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+  }, 30);
+
+  document.addEventListener('mousedown', handlePopoverOutside, true);
+  document.addEventListener('keydown', handlePopoverKey);
 }
 
 // ----------------- Drag & drop -----------------
@@ -554,12 +768,15 @@ function onCardDragEnd(cardEl) {
   document
     .querySelectorAll('.col-body.drag-over')
     .forEach((n) => n.classList.remove('drag-over'));
+  hideDropIndicator();
   dragState = null;
   // Suppress the click that may follow a cancelled drag
   suppressClickUntil = Date.now() + 150;
 }
 
 function computeDropIndex(bodyEl, clientY) {
+  // Returns insertion index into the list that WILL remain after the dragged
+  // card is spliced out (so no off-by-one adjustment is needed downstream).
   const cards = [...bodyEl.querySelectorAll('.card:not(.dragging)')];
   for (let i = 0; i < cards.length; i++) {
     const rect = cards[i].getBoundingClientRect();
@@ -568,20 +785,31 @@ function computeDropIndex(bodyEl, clientY) {
   return cards.length;
 }
 
+function showDropIndicator(bodyEl, toIndex) {
+  hideDropIndicator();
+  const ind = document.createElement('div');
+  ind.className = 'drop-indicator';
+  ind.id = 'drop-indicator';
+  const cards = [...bodyEl.querySelectorAll('.card:not(.dragging)')];
+  if (toIndex >= cards.length) bodyEl.appendChild(ind);
+  else bodyEl.insertBefore(ind, cards[toIndex]);
+}
+
+function hideDropIndicator() {
+  document.getElementById('drop-indicator')?.remove();
+}
+
 async function handleDrop(bodyEl, clientY) {
   if (!dragState) return;
   const toSection = bodyEl.id.replace('col-', '');
-  let toIndex = computeDropIndex(bodyEl, clientY);
+  const toIndex = computeDropIndex(bodyEl, clientY);
 
   const list = state.data[dragState.fromSection];
   const fromIndex = list.findIndex((p) => p.id === dragState.id);
   if (fromIndex === -1) return;
 
-  // Same-column adjustment: if moving down past its own position
-  if (dragState.fromSection === toSection && fromIndex < toIndex) {
-    toIndex--;
-  }
-
+  // computeDropIndex already excludes the dragged card from its search set,
+  // so toIndex is the correct position in the post-splice list.
   const [proj] = list.splice(fromIndex, 1);
   state.data[toSection].splice(toIndex, 0, proj);
   await persistProjects();
@@ -596,13 +824,19 @@ function wireColumnDnD() {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
       body.classList.add('drag-over');
+      const idx = computeDropIndex(body, e.clientY);
+      showDropIndicator(body, idx);
     });
     body.addEventListener('dragleave', (e) => {
-      if (!body.contains(e.relatedTarget)) body.classList.remove('drag-over');
+      if (!body.contains(e.relatedTarget)) {
+        body.classList.remove('drag-over');
+        hideDropIndicator();
+      }
     });
     body.addEventListener('drop', async (e) => {
       e.preventDefault();
       body.classList.remove('drag-over');
+      hideDropIndicator();
       await handleDrop(body, e.clientY);
     });
   }
@@ -746,6 +980,7 @@ async function saveFromModal() {
       color,
       targetDate,
       notes,
+      startDate: now.slice(0, 10),
       createdAt: now,
       updatedAt: now
     });
@@ -758,6 +993,7 @@ async function saveFromModal() {
 
 function renderMetaInfo(p) {
   const parts = [];
+  if (p.startDate) parts.push(`${t('metaStart')}: ${formatDate(p.startDate)}`);
   if (p.createdAt) parts.push(`${t('metaCreated')}: ${formatDateTime(p.createdAt)}`);
   if (p.updatedAt && p.updatedAt !== p.createdAt) {
     parts.push(`${t('metaUpdated')}: ${formatDateTime(p.updatedAt)}`);
@@ -1084,6 +1320,11 @@ function migrateProjects() {
       if (p.notes === undefined) p.notes = '';
       if (p.targetDate === undefined) p.targetDate = null;
       if (p.updatedAt === undefined) p.updatedAt = p.createdAt || new Date().toISOString();
+      if (p.startDate === undefined) {
+        p.startDate = p.createdAt
+          ? p.createdAt.slice(0, 10)
+          : new Date().toISOString().slice(0, 10);
+      }
     }
   }
 }
