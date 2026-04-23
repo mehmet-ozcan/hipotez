@@ -206,6 +206,10 @@ const state = {
   editing: null
 };
 
+// Drag-and-drop state
+let dragState = null; // { id, fromSection }
+let suppressClickUntil = 0;
+
 const $ = (sel) => document.querySelector(sel);
 const el = (tag, attrs = {}, ...children) => {
   const e = document.createElement(tag);
@@ -296,8 +300,15 @@ function renderCard(p) {
 
   const card = el('div', {
     class: 'card',
-    onclick: () => openModal(p.id)
+    onclick: () => {
+      if (Date.now() < suppressClickUntil) return;
+      openModal(p.id);
+    }
   });
+  card.draggable = true;
+  card.dataset.pid = p.id;
+  card.addEventListener('dragstart', (e) => onCardDragStart(e, p.id, card));
+  card.addEventListener('dragend', () => onCardDragEnd(card));
 
   if (p.color) {
     const hex = CARD_COLORS.find((c) => c.key === p.color)?.hex;
@@ -334,6 +345,82 @@ function renderCard(p) {
   );
 
   return card;
+}
+
+// ----------------- Drag & drop -----------------
+function sectionOfCard(cardEl) {
+  const body = cardEl.closest('.col-body');
+  if (!body) return null;
+  return body.id.replace('col-', '');
+}
+
+function onCardDragStart(e, id, cardEl) {
+  const fromSection = sectionOfCard(cardEl);
+  if (!fromSection) return;
+  dragState = { id, fromSection };
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', id);
+  // Delay class add so the drag image is captured pre-opacity
+  requestAnimationFrame(() => cardEl.classList.add('dragging'));
+}
+
+function onCardDragEnd(cardEl) {
+  cardEl.classList.remove('dragging');
+  document
+    .querySelectorAll('.col-body.drag-over')
+    .forEach((n) => n.classList.remove('drag-over'));
+  dragState = null;
+  // Suppress the click that may follow a cancelled drag
+  suppressClickUntil = Date.now() + 150;
+}
+
+function computeDropIndex(bodyEl, clientY) {
+  const cards = [...bodyEl.querySelectorAll('.card:not(.dragging)')];
+  for (let i = 0; i < cards.length; i++) {
+    const rect = cards[i].getBoundingClientRect();
+    if (clientY < rect.top + rect.height / 2) return i;
+  }
+  return cards.length;
+}
+
+async function handleDrop(bodyEl, clientY) {
+  if (!dragState) return;
+  const toSection = bodyEl.id.replace('col-', '');
+  let toIndex = computeDropIndex(bodyEl, clientY);
+
+  const list = state.data[dragState.fromSection];
+  const fromIndex = list.findIndex((p) => p.id === dragState.id);
+  if (fromIndex === -1) return;
+
+  // Same-column adjustment: if moving down past its own position
+  if (dragState.fromSection === toSection && fromIndex < toIndex) {
+    toIndex--;
+  }
+
+  const [proj] = list.splice(fromIndex, 1);
+  state.data[toSection].splice(toIndex, 0, proj);
+  await persistProjects();
+  render();
+}
+
+function wireColumnDnD() {
+  for (const sec of SECTIONS) {
+    const body = document.getElementById(`col-${sec}`);
+    body.addEventListener('dragover', (e) => {
+      if (!dragState) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      body.classList.add('drag-over');
+    });
+    body.addEventListener('dragleave', (e) => {
+      if (!body.contains(e.relatedTarget)) body.classList.remove('drag-over');
+    });
+    body.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      body.classList.remove('drag-over');
+      await handleDrop(body, e.clientY);
+    });
+  }
 }
 
 // ----------------- Project modal -----------------
@@ -729,6 +816,7 @@ async function init() {
   applyBg();
   applyLocale();
   wireEvents();
+  wireColumnDnD();
   render();
 }
 
