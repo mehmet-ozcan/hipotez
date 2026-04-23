@@ -109,9 +109,114 @@ html, body {
   font-size: 0.85rem;
 }
 
+.top-stats {
+  display: flex;
+  gap: 0.45rem;
+  margin-left: auto;
+  margin-right: 0.8rem;
+}
+
+.stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border-soft);
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  user-select: none;
+}
+
+.stat-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+}
+
+.stat-dot.stat-ongoing { background: #7c9cff; }
+.stat-dot.stat-future { background: #c084fc; }
+.stat-dot.stat-completed { background: #4ade80; }
+
+.stat-label {
+  font-weight: 500;
+}
+
+.stat-val {
+  color: var(--text);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 .top-actions {
   display: flex;
   gap: 0.5rem;
+}
+
+/* Filter bar */
+.filterbar {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--border-soft);
+  background: var(--bg);
+}
+
+.filter-search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.6rem;
+  color: var(--text-faint);
+  max-width: 26rem;
+}
+
+.filter-search:focus-within {
+  border-color: var(--accent);
+  color: var(--text-dim);
+}
+
+.filter-search input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.88rem;
+  outline: none;
+}
+
+.filter-select {
+  background: var(--bg-elev);
+  border: 1px solid var(--border-soft);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.6rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  outline: none;
+  cursor: pointer;
+  min-width: 8rem;
+}
+
+.filter-select:hover,
+.filter-select:focus {
+  border-color: var(--accent);
+}
+
+.filterbar.filtering .filter-select,
+.filterbar.filtering .filter-search {
+  border-color: var(--accent);
+}
+
+#filter-clear {
+  font-size: 0.8rem;
 }
 
 .icon-btn-lg {
@@ -140,7 +245,7 @@ html, body {
   grid-template-columns: 1fr 1fr 1fr;
   gap: 1rem;
   padding: 1rem;
-  height: calc(100vh - 4.5rem - 2.2rem);
+  height: calc(100vh - 4.5rem - 3.1rem - 2.2rem);
   overflow: hidden;
 }
 
@@ -340,6 +445,50 @@ html, body {
   cursor: not-allowed;
 }
 
+/* Card extras row (target date + notes indicator) */
+.card-extras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+  padding-top: 0.45rem;
+  border-top: 1px dashed var(--border-soft);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.card-extras:empty {
+  display: none;
+}
+
+.extra-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.3rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-soft);
+}
+
+.extra-pill.target-overdue {
+  color: #ffb4b4;
+  background: rgba(224, 108, 108, 0.1);
+  border-color: rgba(224, 108, 108, 0.35);
+}
+
+.extra-pill.target-soon {
+  color: #ffd59e;
+  background: rgba(234, 179, 8, 0.08);
+  border-color: rgba(234, 179, 8, 0.3);
+}
+
+.extra-pill svg {
+  width: 0.8rem;
+  height: 0.8rem;
+  flex-shrink: 0;
+}
+
 /* Footer */
 .appfoot {
   height: 2.2rem;
@@ -438,7 +587,9 @@ html, body {
 }
 
 .modal-body input[type="text"],
-.modal-body select {
+.modal-body input[type="date"],
+.modal-body select,
+.modal-body textarea {
   background: var(--bg);
   border: 1px solid var(--border);
   color: var(--text);
@@ -450,9 +601,34 @@ html, body {
   transition: border-color 0.15s ease;
 }
 
-.modal-body input[type="text"]:focus,
-.modal-body select:focus {
+.modal-body input[type="date"] {
+  color-scheme: dark;
+  flex: 1;
+}
+
+.modal-body textarea {
+  resize: vertical;
+  min-height: 4.5rem;
+  line-height: 1.45;
+}
+
+.modal-body input:focus,
+.modal-body select:focus,
+.modal-body textarea:focus {
   border-color: var(--accent);
+}
+
+.meta-info {
+  margin-top: 0.3rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--border-soft);
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  line-height: 1.5;
+}
+
+.meta-info:empty {
+  display: none;
 }
 
 .folder-row {

@@ -14,6 +14,23 @@
         <span class="brand-sub" data-i18n="appSub">Akademik Proje Planlayıcı</span>
       </div>
     </div>
+    <div class="top-stats" id="top-stats">
+      <div class="stat-chip" data-stat="ongoing" title="">
+        <span class="stat-dot stat-ongoing"></span>
+        <span class="stat-label" data-i18n="statsOngoing">Devam</span>
+        <span class="stat-val" id="stat-ongoing">0</span>
+      </div>
+      <div class="stat-chip" data-stat="future" title="">
+        <span class="stat-dot stat-future"></span>
+        <span class="stat-label" data-i18n="statsFuture">Gelecek</span>
+        <span class="stat-val" id="stat-future">0</span>
+      </div>
+      <div class="stat-chip" data-stat="completed" title="">
+        <span class="stat-dot stat-completed"></span>
+        <span class="stat-label" data-i18n="statsCompleted">Bitmiş</span>
+        <span class="stat-val" id="stat-completed">0</span>
+      </div>
+    </div>
     <div class="top-actions">
       <button class="icon-btn-lg" id="open-settings" title="Ayarlar" data-i18n-title="settingsTitle">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -23,6 +40,19 @@
       </button>
     </div>
   </header>
+
+  <div class="filterbar">
+    <div class="filter-search">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <path d="M21 21l-4.35-4.35"></path>
+      </svg>
+      <input type="text" id="filter-q" data-i18n-ph="searchPh" placeholder="Ara…" />
+    </div>
+    <select id="filter-type" class="filter-select"></select>
+    <select id="filter-stage" class="filter-select"></select>
+    <button class="ghost" id="filter-clear" data-i18n="filterClear">Filtreleri Temizle</button>
+  </div>
 
   <main class="board">
     <section class="column" data-col="ongoing">
@@ -95,9 +125,21 @@
           </div>
         </label>
         <label>
+          <span data-i18n="fTargetDate">Hedef Tarih</span>
+          <div class="folder-row">
+            <input type="date" id="f-target" />
+            <button class="secondary" id="f-target-clear" title="Temizle">✕</button>
+          </div>
+        </label>
+        <label>
+          <span data-i18n="fNotes">Notlar</span>
+          <textarea id="f-notes" data-i18n-ph="fNotesPh" placeholder="Serbest metin…" rows="3"></textarea>
+        </label>
+        <label>
           <span data-i18n="fColor">Kart Rengi</span>
           <div class="color-chips" id="f-color-chips"></div>
         </label>
+        <div class="meta-info" id="f-meta"></div>
       </div>
       <footer class="modal-foot">
         <button class="ghost danger" id="modal-delete" data-i18n="btnDelete">Sil</button>

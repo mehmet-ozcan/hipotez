@@ -52,6 +52,22 @@ const I18N = {
     toastImported: 'Yedek içe aktarıldı',
     toastExternalChange: 'Veriler başka bir cihazdan güncellendi',
     toastImportInvalid: 'Dosya geçerli bir Hipotez yedeği değil',
+    searchPh: 'Ara…',
+    filterAll: 'Tümü',
+    filterAllTypes: 'Tüm Tipler',
+    filterAllStages: 'Tüm Aşamalar',
+    filterClear: 'Filtreleri Temizle',
+    emptyFiltered: 'Filtreye uyan proje yok',
+    fNotes: 'Notlar',
+    fNotesPh: 'Serbest metin…',
+    fTargetDate: 'Hedef Tarih',
+    cardTargetOverdue: 'Gecikmiş',
+    metaCreated: 'Oluşturuldu',
+    metaUpdated: 'Son güncelleme',
+    statsOngoing: 'Devam',
+    statsFuture: 'Gelecek',
+    statsCompleted: 'Bitmiş',
+    statsTotal: 'Toplam',
     stages: {
       planning: 'Planlama',
       drafting: 'Taslak Oluşturma',
@@ -124,6 +140,22 @@ const I18N = {
     toastImported: 'Backup imported',
     toastExternalChange: 'Data updated from another device',
     toastImportInvalid: 'File is not a valid Hipotez backup',
+    searchPh: 'Search…',
+    filterAll: 'All',
+    filterAllTypes: 'All Types',
+    filterAllStages: 'All Stages',
+    filterClear: 'Clear Filters',
+    emptyFiltered: 'No projects match the filter',
+    fNotes: 'Notes',
+    fNotesPh: 'Free text…',
+    fTargetDate: 'Target Date',
+    cardTargetOverdue: 'Overdue',
+    metaCreated: 'Created',
+    metaUpdated: 'Last updated',
+    statsOngoing: 'Ongoing',
+    statsFuture: 'Future',
+    statsCompleted: 'Done',
+    statsTotal: 'Total',
     stages: {
       planning: 'Planning',
       drafting: 'Drafting',
@@ -203,7 +235,8 @@ const SECTIONS = ['ongoing', 'future', 'completed'];
 const state = {
   data: { ongoing: [], future: [], completed: [] },
   settings: { fontScale: 1, bgPreset: 'charcoal', language: 'tr' },
-  editing: null
+  editing: null,
+  filters: { q: '', type: 'all', stage: 'all' }
 };
 
 // Drag-and-drop state
@@ -250,16 +283,49 @@ function findProject(id) {
 }
 
 // ----------------- Render: cards -----------------
+function isFilterActive() {
+  const f = state.filters;
+  return (f.q && f.q.trim()) || f.type !== 'all' || f.stage !== 'all';
+}
+
+function matchesFilter(p) {
+  const f = state.filters;
+  if (f.type !== 'all' && p.type !== f.type) return false;
+  if (f.stage !== 'all' && p.stage !== f.stage) return false;
+  if (f.q && f.q.trim()) {
+    const q = f.q.trim().toLowerCase();
+    const hay = [p.name, p.coauthors, p.notes]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    if (!hay.includes(q)) return false;
+  }
+  return true;
+}
+
 function render() {
   for (const sec of SECTIONS) {
     const body = document.getElementById(`col-${sec}`);
     body.innerHTML = '';
-    const items = state.data[sec];
+    const items = state.data[sec].filter(matchesFilter);
     if (!items.length) {
-      body.append(el('div', { class: 'empty', text: t('empty') }));
+      const msg = isFilterActive() ? t('emptyFiltered') : t('empty');
+      body.append(el('div', { class: 'empty', text: msg }));
       continue;
     }
     for (const p of items) body.append(renderCard(p));
+  }
+  renderStats();
+}
+
+function renderStats() {
+  for (const sec of SECTIONS) {
+    const all = state.data[sec].length;
+    const shown = state.data[sec].filter(matchesFilter).length;
+    const cell = document.getElementById(`stat-${sec}`);
+    if (cell) cell.textContent = isFilterActive() && shown !== all
+      ? `${shown}/${all}`
+      : String(all);
   }
 }
 
@@ -344,7 +410,126 @@ function renderCard(p) {
     )
   );
 
+  const extras = renderCardExtras(p);
+  if (extras) card.append(extras);
+
   return card;
+}
+
+function renderCardExtras(p) {
+  const pills = [];
+
+  if (p.targetDate) {
+    const status = targetDateStatus(p.targetDate);
+    const cls =
+      status === 'overdue'
+        ? 'extra-pill target-overdue'
+        : status === 'soon'
+        ? 'extra-pill target-soon'
+        : 'extra-pill';
+    const pill = el(
+      'span',
+      {
+        class: cls,
+        title:
+          status === 'overdue'
+            ? t('cardTargetOverdue')
+            : formatDate(p.targetDate)
+      },
+      targetIconSvg(),
+      document.createTextNode(formatDate(p.targetDate))
+    );
+    pills.push(pill);
+  }
+
+  if (p.notes && p.notes.trim()) {
+    const pill = el(
+      'span',
+      {
+        class: 'extra-pill',
+        title: p.notes.length > 160 ? p.notes.slice(0, 160) + '…' : p.notes
+      },
+      notesIconSvg()
+    );
+    pills.push(pill);
+  }
+
+  if (!pills.length) return null;
+  const row = el('div', { class: 'card-extras' });
+  for (const pill of pills) row.append(pill);
+  return row;
+}
+
+function targetDateStatus(iso) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(iso + 'T00:00:00');
+  const diffDays = Math.round((target - today) / 86400000);
+  if (diffDays < 0) return 'overdue';
+  if (diffDays <= 7) return 'soon';
+  return 'future';
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  const locale = state.settings.language === 'en' ? 'en-US' : 'tr-TR';
+  try {
+    return new Date(iso + 'T00:00:00').toLocaleDateString(locale, {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  } catch {
+    return iso;
+  }
+}
+
+function formatDateTime(iso) {
+  if (!iso) return '';
+  const locale = state.settings.language === 'en' ? 'en-US' : 'tr-TR';
+  try {
+    return new Date(iso).toLocaleString(locale, {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch {
+    return iso;
+  }
+}
+
+function targetIconSvg() {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '2');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  p1.setAttribute('x', '3'); p1.setAttribute('y', '4');
+  p1.setAttribute('width', '18'); p1.setAttribute('height', '18');
+  p1.setAttribute('rx', '2');
+  const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  p2.setAttribute('d', 'M16 2v4M8 2v4M3 10h18');
+  svg.append(p1, p2);
+  return svg;
+}
+
+function notesIconSvg() {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '2');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', 'M4 6h16M4 12h16M4 18h10');
+  svg.append(path);
+  return svg;
 }
 
 // ----------------- Drag & drop -----------------
@@ -481,14 +666,20 @@ function openModal(id = null) {
     $('#f-stage').value = p.stage || 'planning';
     $('#f-section').value = found.section;
     $('#f-folder').value = p.folder || '';
+    $('#f-target').value = p.targetDate || '';
+    $('#f-notes').value = p.notes || '';
     pendingCardColor = p.color || null;
+    renderMetaInfo(p);
   } else {
     $('#f-name').value = '';
     $('#f-coauthors').value = '';
     $('#f-type').value = 'undecided';
     $('#f-stage').value = 'planning';
     $('#f-folder').value = '';
+    $('#f-target').value = '';
+    $('#f-notes').value = '';
     pendingCardColor = null;
+    $('#f-meta').innerHTML = '';
   }
 
   buildColorChips($('#f-color-chips'), pendingCardColor, (v) => {
@@ -521,12 +712,25 @@ async function saveFromModal() {
   const section = $('#f-section').value;
   const folder = $('#f-folder').value.trim() || null;
   const color = pendingCardColor || null;
+  const targetDate = $('#f-target').value || null;
+  const notes = $('#f-notes').value;
+  const now = new Date().toISOString();
 
   if (state.editing) {
     const found = findProject(state.editing);
     if (!found) return;
     const p = found.project;
-    Object.assign(p, { name, coauthors, type, stage, folder, color });
+    Object.assign(p, {
+      name,
+      coauthors,
+      type,
+      stage,
+      folder,
+      color,
+      targetDate,
+      notes,
+      updatedAt: now
+    });
     if (found.section !== section) {
       state.data[found.section].splice(found.index, 1);
       state.data[section].push(p);
@@ -540,13 +744,25 @@ async function saveFromModal() {
       stage,
       folder,
       color,
-      createdAt: new Date().toISOString()
+      targetDate,
+      notes,
+      createdAt: now,
+      updatedAt: now
     });
   }
 
   await persistProjects();
   render();
   closeModal();
+}
+
+function renderMetaInfo(p) {
+  const parts = [];
+  if (p.createdAt) parts.push(`${t('metaCreated')}: ${formatDateTime(p.createdAt)}`);
+  if (p.updatedAt && p.updatedAt !== p.createdAt) {
+    parts.push(`${t('metaUpdated')}: ${formatDateTime(p.updatedAt)}`);
+  }
+  $('#f-meta').textContent = parts.join(' · ');
 }
 
 async function deleteCurrent() {
@@ -602,6 +818,7 @@ function applyLocale() {
   document.querySelectorAll('[data-i18n-ph]').forEach((n) => {
     n.setAttribute('placeholder', t(n.getAttribute('data-i18n-ph')));
   });
+  buildFilterSelects();
   renderFooter();
 }
 
@@ -694,9 +911,73 @@ function closeSettings() {
 }
 
 // ----------------- Events -----------------
+function buildFilterSelects() {
+  const typeSel = $('#filter-type');
+  typeSel.innerHTML = '';
+  const allType = document.createElement('option');
+  allType.value = 'all';
+  allType.textContent = t('filterAllTypes');
+  typeSel.append(allType);
+  for (const k of TYPE_KEYS) {
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = t(`types.${k}`);
+    typeSel.append(opt);
+  }
+  typeSel.value = state.filters.type;
+
+  const stageSel = $('#filter-stage');
+  stageSel.innerHTML = '';
+  const allStage = document.createElement('option');
+  allStage.value = 'all';
+  allStage.textContent = t('filterAllStages');
+  stageSel.append(allStage);
+  for (const k of STAGE_KEYS) {
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = t(`stages.${k}`);
+    stageSel.append(opt);
+  }
+  stageSel.value = state.filters.stage;
+}
+
+function updateFilterBarState() {
+  document
+    .querySelector('.filterbar')
+    .classList.toggle('filtering', isFilterActive());
+}
+
 function wireEvents() {
   document.querySelectorAll('.add-btn').forEach((btn) => {
     btn.addEventListener('click', () => openModalForSection(btn.dataset.add));
+  });
+
+  $('#filter-q').addEventListener('input', (e) => {
+    state.filters.q = e.target.value;
+    updateFilterBarState();
+    render();
+  });
+  $('#filter-type').addEventListener('change', (e) => {
+    state.filters.type = e.target.value;
+    updateFilterBarState();
+    render();
+  });
+  $('#filter-stage').addEventListener('change', (e) => {
+    state.filters.stage = e.target.value;
+    updateFilterBarState();
+    render();
+  });
+  $('#filter-clear').addEventListener('click', () => {
+    state.filters = { q: '', type: 'all', stage: 'all' };
+    $('#filter-q').value = '';
+    $('#filter-type').value = 'all';
+    $('#filter-stage').value = 'all';
+    updateFilterBarState();
+    render();
+  });
+
+  $('#f-target-clear').addEventListener('click', () => {
+    $('#f-target').value = '';
   });
 
   $('#modal-close').addEventListener('click', closeModal);
@@ -800,6 +1081,9 @@ function migrateProjects() {
       if (!STAGE_KEYS.includes(p.stage)) p.stage = 'planning';
       if (!p.type) p.type = 'undecided';
       if (!TYPE_KEYS.includes(p.type)) p.type = 'undecided';
+      if (p.notes === undefined) p.notes = '';
+      if (p.targetDate === undefined) p.targetDate = null;
+      if (p.updatedAt === undefined) p.updatedAt = p.createdAt || new Date().toISOString();
     }
   }
 }
@@ -815,6 +1099,8 @@ async function init() {
   applyFont();
   applyBg();
   applyLocale();
+  buildFilterSelects();
+  updateFilterBarState();
   wireEvents();
   wireColumnDnD();
   render();
