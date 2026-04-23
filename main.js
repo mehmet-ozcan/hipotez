@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { spawn } = require('child_process');
 
 let mainWindow;
 let watcher = null;
@@ -175,6 +176,27 @@ ipcMain.handle('folder:pick', async () => {
 
 ipcMain.handle('folder:open', async (_e, p) => {
   if (!p) return false;
+  try {
+    if (!fs.existsSync(p)) return false;
+  } catch (_) {
+    return false;
+  }
+  // On Windows, shell.openPath can launch Explorer in "explore" mode which
+  // forces the navigation pane to appear regardless of the user's global
+  // "Show navigation pane" setting. Spawning explorer.exe directly with just
+  // the folder path opens it in normal mode and respects the user's setting.
+  if (process.platform === 'win32') {
+    try {
+      const child = spawn('explorer.exe', [path.normalize(p)], {
+        detached: true,
+        stdio: 'ignore'
+      });
+      child.unref();
+      return true;
+    } catch (e) {
+      // fall through to shell.openPath as a last resort
+    }
+  }
   const err = await shell.openPath(p);
   return err === '';
 });
