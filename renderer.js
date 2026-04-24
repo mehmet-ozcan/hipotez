@@ -60,6 +60,14 @@ const I18N = {
     emptyFiltered: 'Filtreye uyan proje yok',
     fNotes: 'Notlar',
     fNotesPh: 'Serbest metin…',
+    btnLock: 'Gizle',
+    btnUnlock: 'Kilidi Aç',
+    pinTitleSet: 'Şifre Belirle',
+    pinDescSet: 'İlk gizli dosyanız için 4 haneli bir şifre belirleyin.',
+    pinTitleEnter: 'Şifre Girin',
+    pinDescEnter: 'Gizli kartları açmak için şifrenizi girin.',
+    pinErrorLength: 'Şifre 4 haneli olmalıdır.',
+    pinErrorWrong: 'Hatalı şifre!',
     fTargetDate: 'Hedef Tarih',
     cardTargetOverdue: 'Gecikmiş',
     cardStartLabel: 'Başl.',
@@ -156,6 +164,14 @@ const I18N = {
     emptyFiltered: 'No projects match the filter',
     fNotes: 'Notes',
     fNotesPh: 'Free text…',
+    btnLock: 'Hide',
+    btnUnlock: 'Unlock',
+    pinTitleSet: 'Set PIN',
+    pinDescSet: 'Set a 4-digit PIN for your first hidden project.',
+    pinTitleEnter: 'Enter PIN',
+    pinDescEnter: 'Enter your PIN to unlock hidden cards.',
+    pinErrorLength: 'PIN must be 4 digits.',
+    pinErrorWrong: 'Incorrect PIN!',
     fTargetDate: 'Target Date',
     cardTargetOverdue: 'Overdue',
     cardStartLabel: 'Start',
@@ -252,7 +268,8 @@ const state = {
   data: { ongoing: [], future: [], completed: [] },
   settings: { fontScale: 1, bgPreset: 'charcoal', language: 'tr' },
   editing: null,
-  filters: { q: '', type: 'all', stage: 'all' }
+  filters: { q: '', type: 'all', stage: 'all' },
+  unlockTarget: null
 };
 
 // Drag-and-drop state
@@ -384,11 +401,34 @@ function renderCard(p) {
     class: 'card',
     onclick: () => {
       if (Date.now() < suppressClickUntil) return;
+      if (p.hidden) return; // Gizliyse doğrudan karta tıklanmaz
       openModal(p.id);
     }
   });
   card.draggable = true;
+  if (p.hidden) {
+    card.classList.add('hidden-card');
+  }
   card.dataset.pid = p.id;
+
+  const lockBtn = el('button', {
+    class: 'icon-btn card-lock-btn',
+    title: p.hidden ? t('btnUnlock') : t('btnLock'),
+    onclick: (e) => {
+      e.stopPropagation();
+      if (p.hidden) {
+        state.unlockTarget = p.id;
+        openPinModal();
+      } else {
+        p.hidden = true;
+        p.updatedAt = new Date().toISOString();
+        persistProjects().then(() => render());
+      }
+    }
+  });
+  lockBtn.innerHTML = p.hidden ? lockClosedSvg() : lockOpenSvg();
+  card.append(lockBtn);
+
   card.addEventListener('dragstart', (e) => onCardDragStart(e, p.id, card));
   card.addEventListener('dragend', () => onCardDragEnd(card));
 
@@ -586,6 +626,20 @@ function notesIconSvg() {
   return svg;
 }
 
+function lockClosedSvg() {
+  return `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+  </svg>`;
+}
+
+function lockOpenSvg() {
+  return `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+    <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+  </svg>`;
+}
+
 // ----------------- Popover (date/notes) -----------------
 function handlePopoverOutside(e) {
   const pop = document.querySelector('.popover');
@@ -707,13 +761,32 @@ function openNotesPopover(anchor, project) {
   textarea.value = project.notes || '';
 
   const saveIfChanged = async () => {
-    if (textarea.value === (project.notes || '')) return;
-    const found = findProject(project.id);
-    if (!found) return;
-    found.project.notes = textarea.value;
-    found.project.updatedAt = new Date().toISOString();
-    await persistProjects();
-    render();
+    let changed = false;
+    if (textarea.value !== (project.notes || '')) {
+      const found = findProject(project.id);
+      if (found) {
+        found.project.notes = textarea.value;
+        found.project.updatedAt = new Date().toISOString();
+        changed = true;
+      }
+    }
+    
+    const popNode = document.querySelector('.notes-popover');
+    if (popNode) {
+      const w = popNode.offsetWidth + 'px';
+      const h = popNode.offsetHeight + 'px';
+      if (w !== state.settings.notesWidth || h !== state.settings.notesHeight) {
+        state.settings.notesWidth = w;
+        state.settings.notesHeight = h;
+        changed = true;
+      }
+    }
+    
+    if (changed) {
+      await persistSettings();
+      await persistProjects();
+      render();
+    }
   };
 
   const pop = el(
@@ -735,7 +808,40 @@ function openNotesPopover(anchor, project) {
   );
   pop._onBeforeClose = saveIfChanged;
 
+  if (state.settings.notesWidth) pop.style.width = state.settings.notesWidth;
+  if (state.settings.notesHeight) pop.style.height = state.settings.notesHeight;
+
   positionPopover(pop, anchor);
+
+  const head = pop.querySelector('.pop-head');
+  let isDragging = false;
+  let startX, startY, startLeft, startTop;
+
+  head.addEventListener('mousedown', (e) => {
+    if (e.target.tagName === 'BUTTON') return;
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    const rect = pop.getBoundingClientRect();
+    startLeft = rect.left;
+    startTop = rect.top;
+    e.preventDefault();
+    
+    const onMove = (ev) => {
+      pop.style.left = (startLeft + ev.clientX - startX) + 'px';
+      pop.style.top = (startTop + ev.clientY - startY) + 'px';
+      pop.style.bottom = 'auto';
+      pop.style.right = 'auto';
+    };
+    
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+    
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
 
   setTimeout(() => {
     textarea.focus();
@@ -980,6 +1086,7 @@ async function saveFromModal() {
       color,
       targetDate,
       notes,
+      hidden: false,
       startDate: now.slice(0, 10),
       createdAt: now,
       updatedAt: now
@@ -1009,6 +1116,68 @@ async function deleteCurrent() {
   await persistProjects();
   render();
   closeModal();
+}
+
+function openPinModal() {
+  $('#pin-input').value = '';
+  $('#pin-error').textContent = '';
+  
+  if (!state.settings.pin) {
+    $('#pin-title').textContent = t('pinTitleSet');
+    $('#pin-desc').textContent = t('pinDescSet');
+  } else {
+    $('#pin-title').textContent = t('pinTitleEnter');
+    $('#pin-desc').textContent = t('pinDescEnter');
+  }
+  
+  $('#pin-modal').classList.remove('hidden');
+  setTimeout(() => $('#pin-input').focus(), 40);
+}
+
+function closePinModal() {
+  $('#pin-modal').classList.add('hidden');
+}
+
+async function submitPin() {
+  const pin = $('#pin-input').value;
+  if (pin.length !== 4) {
+    $('#pin-error').textContent = t('pinErrorLength');
+    return;
+  }
+  
+  if (!state.settings.pin) {
+    state.settings.pin = pin;
+    await persistSettings();
+    if (state.unlockTarget) {
+      const found = findProject(state.unlockTarget);
+      if (found) {
+        found.project.hidden = false;
+        found.project.updatedAt = new Date().toISOString();
+        await persistProjects();
+      }
+      state.unlockTarget = null;
+    }
+    closePinModal();
+    render();
+  } else {
+    if (state.settings.pin === pin) {
+      if (state.unlockTarget) {
+        const found = findProject(state.unlockTarget);
+        if (found) {
+          found.project.hidden = false;
+          found.project.updatedAt = new Date().toISOString();
+          await persistProjects();
+        }
+        state.unlockTarget = null;
+      }
+      closePinModal();
+      render();
+    } else {
+      $('#pin-error').textContent = t('pinErrorWrong');
+      $('#pin-input').value = '';
+      $('#pin-input').focus();
+    }
+  }
 }
 
 // ----------------- Settings modal -----------------
@@ -1234,6 +1403,16 @@ function wireEvents() {
     $('#f-folder').value = '';
   });
 
+  // PIN Modal
+  $('#pin-close').addEventListener('click', closePinModal);
+  $('#pin-submit').addEventListener('click', submitPin);
+  $('#pin-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') submitPin();
+  });
+  $('#pin-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'pin-modal') closePinModal();
+  });
+
   // Settings
   $('#open-settings').addEventListener('click', openSettings);
   $('#settings-close').addEventListener('click', closeSettings);
@@ -1301,9 +1480,11 @@ function wireEvents() {
   document.addEventListener('keydown', (e) => {
     if (!$('#modal').classList.contains('hidden')) {
       if (e.key === 'Escape') closeModal();
-      if (e.key === 'Enter' && e.target.tagName === 'INPUT') saveFromModal();
+      if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.id !== 'pin-input') saveFromModal();
     } else if (!$('#settings-modal').classList.contains('hidden')) {
       if (e.key === 'Escape') closeSettings();
+    } else if (!$('#pin-modal').classList.contains('hidden')) {
+      if (e.key === 'Escape') closePinModal();
     }
   });
 }

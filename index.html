@@ -218,6 +218,25 @@
 
   <div class="toast" id="toast"></div>
 
+  <!-- PIN modal -->
+  <div class="modal-backdrop hidden" id="pin-modal">
+    <div class="modal" style="width: 22rem;">
+      <header class="modal-head">
+        <h3 id="pin-title">Şifre Girin</h3>
+        <button class="icon-btn" id="pin-close" title="Kapat">×</button>
+      </header>
+      <div class="modal-body">
+        <p id="pin-desc" style="font-size: 0.85rem; color: var(--text-dim); margin-top: 0;"></p>
+        <input type="password" id="pin-input" class="pin-input" maxlength="4" placeholder="••••" style="text-align: center; font-size: 2rem; letter-spacing: 0.5rem;" />
+        <div id="pin-error" style="color: var(--danger); font-size: 0.8rem; text-align: center; height: 1rem;"></div>
+      </div>
+      <footer class="modal-foot">
+        <div class="spacer"></div>
+        <button class="primary" id="pin-submit" data-i18n="btnDone">Tamam</button>
+      </footer>
+    </div>
+  </div>
+
   <script src="renderer.js"></script>
 </body>
 </html>

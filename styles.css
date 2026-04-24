@@ -351,6 +351,39 @@ html, body {
   cursor: grabbing;
 }
 
+.card.hidden-card > *:not(.card-lock-btn) {
+  filter: blur(6px);
+  pointer-events: none;
+  opacity: 0.4;
+  user-select: none;
+}
+
+.card-lock-btn {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 0.3rem;
+  padding: 0.25rem;
+  color: var(--text-dim);
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.card-lock-btn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.card:hover .card-lock-btn {
+  opacity: 1;
+}
+
 .col-body.drag-over {
   background: rgba(124, 156, 255, 0.06);
   box-shadow: inset 0 0 0 2px rgba(124, 156, 255, 0.4);
@@ -597,6 +630,11 @@ html, body {
   justify-content: space-between;
   gap: 0.5rem;
   background: rgba(255, 255, 255, 0.02);
+  cursor: grab;
+}
+
+.popover.notes-popover .pop-head:active {
+  cursor: grabbing;
 }
 
 .popover.notes-popover .pop-title-inline {
