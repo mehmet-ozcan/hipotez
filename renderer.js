@@ -1353,6 +1353,14 @@ function updateFilterBarState() {
 }
 
 function wireEvents() {
+  // Title bar
+  const btnMin = $('#btn-minimize');
+  if (btnMin) btnMin.addEventListener('click', () => window.api.windowMinimize());
+  const btnMax = $('#btn-maximize');
+  if (btnMax) btnMax.addEventListener('click', () => window.api.windowMaximize());
+  const btnClose = $('#btn-close');
+  if (btnClose) btnClose.addEventListener('click', () => window.api.windowClose());
+
   document.querySelectorAll('.add-btn').forEach((btn) => {
     btn.addEventListener('click', () => openModalForSection(btn.dataset.add));
   });

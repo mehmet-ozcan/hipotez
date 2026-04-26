@@ -62,6 +62,53 @@ html, body {
   user-select: none;
 }
 
+/* Title bar */
+.titlebar {
+  height: 2rem;
+  display: flex;
+  background: var(--bg);
+  position: relative;
+  z-index: 9999;
+}
+
+.titlebar-drag-region {
+  flex: 1;
+  -webkit-app-region: drag;
+}
+
+.titlebar-controls {
+  display: flex;
+  -webkit-app-region: no-drag;
+}
+
+.titlebar-btn {
+  width: 2.8rem;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.titlebar-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+}
+
+.titlebar-btn.btn-close:hover {
+  background: #e81123;
+  color: #fff;
+}
+
+.titlebar-btn svg {
+  width: 10px;
+  height: 10px;
+}
+
 /* Top bar */
 .topbar {
   height: 4.5rem;
@@ -245,7 +292,7 @@ html, body {
   grid-template-columns: 1fr 1fr 1fr;
   gap: 1rem;
   padding: 1rem;
-  height: calc(100vh - 4.5rem - 3.1rem - 2.2rem);
+  height: calc(100vh - 4.5rem - 3.1rem - 2.2rem - 2rem);
   overflow: hidden;
 }
 

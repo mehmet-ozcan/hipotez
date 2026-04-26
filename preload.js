@@ -23,5 +23,10 @@ contextBridge.exposeInMainWorld('api', {
     const h = () => cb();
     ipcRenderer.on('data:external-change', h);
     return () => ipcRenderer.removeListener('data:external-change', h);
-  }
+  },
+
+  // Window Controls
+  windowMinimize: () => ipcRenderer.invoke('window:minimize'),
+  windowMaximize: () => ipcRenderer.invoke('window:maximize'),
+  windowClose: () => ipcRenderer.invoke('window:close')
 });

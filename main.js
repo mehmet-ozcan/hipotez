@@ -111,6 +111,7 @@ function createWindow() {
     backgroundColor: '#0f1115',
     title: 'Hipotez',
     icon: path.join(__dirname, 'assets', 'app-icon.ico'),
+    frame: false,
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -142,6 +143,26 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
+});
+
+// ---------- IPC: window controls ----------
+
+ipcMain.handle('window:minimize', () => {
+  if (mainWindow) mainWindow.minimize();
+});
+
+ipcMain.handle('window:maximize', () => {
+  if (mainWindow) {
+    if (mainWindow.isMaximized()) {
+      mainWindow.unmaximize();
+    } else {
+      mainWindow.maximize();
+    }
+  }
+});
+
+ipcMain.handle('window:close', () => {
+  if (mainWindow) mainWindow.close();
 });
 
 // ---------- IPC: projects / settings ----------
