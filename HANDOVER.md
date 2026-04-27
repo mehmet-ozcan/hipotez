@@ -10,7 +10,7 @@
 - **Sahip:** Mehmet Özcan — <https://www.ozcanmehmet.com>
 - **Repo:** <https://github.com/mehmet-ozcan/hipotez>
 - **Lisans:** All Rights Reserved (c) 2026 Mehmet Özcan (repoda `LICENSE` dosyası)
-- **Mevcut Sürüm:** `1.6.0` (yayınlanmış GitHub Release mevcut)
+- **Mevcut Sürüm:** `1.8.0` (yayınlanmış GitHub Release mevcut olacak)
 - **Teknoloji:** Electron 33 + electron-builder 25 (NSIS x64 kurulum)
 - **Dil:** Arayüz TR/EN (i18n), kod yorumları TR
 - **Platform:** Windows (öncelik), macOS/Linux yapılandırılmamış
@@ -110,7 +110,20 @@ Eklendi: `cardStartLabel`, `cardTargetLabel`, `popStartDate`, `popTargetDate`, `
 
 ---
 
-## 4. Paketleme & Release Akışı
+## 4. v1.8.0 — Yeni Özellikler
+
+### 4.1 Renk Paleti ve Aşama Seçimi
+- Proje kartlarındaki renk seçenekleri 8'den 24'e çıkarılarak zenginleştirildi (ocean, emerald, crimson, vb.).
+- `STAGE_KEYS` listesi güncellenerek (Fikir, Planlama, Literatür Taraması, vb.) detaylandırıldı.
+- Kartın altındaki aşama göstergesi (stage-pill) doğrudan değiştirilebilir bir açılır menüye (`<select>`) dönüştürüldü. Eski projelerdeki aşamalar `migrateProjects` ile geriye dönük uyumlu hale getirildi.
+
+### 4.2 Sütun Özelleştirmeleri
+- Ana sütunlar (ongoing, future, completed) kendi aralarında sürükle-bırak ile yer değiştirebilir hale getirildi (`state.settings.colOrder` ile kalıcı).
+- Sütun başlıklarındaki yazılar (`contenteditable`) tıklanarak doğrudan düzenlenebilir yapıldı ve `state.settings.colNames` altına kaydedilmesi sağlandı.
+
+---
+
+## 5. Paketleme & Release Akışı
 
 Her iş bitiminde standart akış (kullanıcı hatırlatılmasını istedi):
 
@@ -201,4 +214,4 @@ Dosyada şunlar ayarlı:
 
 ---
 
-*Son güncelleme: 2026-04-24 — v1.6.0 sonrası devir notu.*
+*Son güncelleme: 2026-04-27 — v1.8.0 sonrası devir notu.*

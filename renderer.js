@@ -85,13 +85,15 @@ const I18N = {
     statsCompleted: 'Bitmiş',
     statsTotal: 'Toplam',
     stages: {
+      idea: 'Fikir',
       planning: 'Planlama',
-      drafting: 'Taslak Oluşturma',
+      literature: 'Literatür Taraması',
       empirical: 'Ampirik Analiz',
       discussion: 'Tartışma-Sonuç',
       polishing: 'Gönderi Öncesi Cilalama',
       submitted: 'Gönderildi',
-      revision: 'Hakem Düzeltmesi'
+      revision: 'Hakem Düzeltmesi',
+      completed: 'Tamamlandı'
     },
     types: {
       article: 'Makale',
@@ -189,13 +191,15 @@ const I18N = {
     statsCompleted: 'Done',
     statsTotal: 'Total',
     stages: {
+      idea: 'Idea',
       planning: 'Planning',
-      drafting: 'Drafting',
+      literature: 'Literature Review',
       empirical: 'Empirical Analysis',
       discussion: 'Discussion-Conclusion',
       polishing: 'Pre-submission Polishing',
       submitted: 'Submitted',
-      revision: 'Referee Revision'
+      revision: 'Reviewer Revision',
+      completed: 'Completed'
     },
     types: {
       article: 'Article',
@@ -211,13 +215,15 @@ const I18N = {
 };
 
 const STAGE_KEYS = [
+  'idea',
   'planning',
-  'drafting',
+  'literature',
   'empirical',
   'discussion',
   'polishing',
   'submitted',
-  'revision'
+  'revision',
+  'completed'
 ];
 
 const TYPE_KEYS = [
@@ -249,7 +255,23 @@ const CARD_COLORS = [
   { key: 'rose', hex: '#5a2a3a' },
   { key: 'forest', hex: '#264d2d' },
   { key: 'plum', hex: '#3e2a4a' },
-  { key: 'sienna', hex: '#4a3520' }
+  { key: 'sienna', hex: '#4a3520' },
+  { key: 'ocean', hex: '#1a3b5c' },
+  { key: 'emerald', hex: '#174029' },
+  { key: 'crimson', hex: '#5c1a1f' },
+  { key: 'violet', hex: '#381c5e' },
+  { key: 'bronze', hex: '#5c3a1a' },
+  { key: 'sapphire', hex: '#162b59' },
+  { key: 'moss', hex: '#2b3b1c' },
+  { key: 'wine', hex: '#4f162c' },
+  { key: 'midnight', hex: '#121b2b' },
+  { key: 'olive', hex: '#3d4016' },
+  { key: 'rust', hex: '#592c16' },
+  { key: 'cobalt', hex: '#163659' },
+  { key: 'eggplant', hex: '#2d163d' },
+  { key: 'pine', hex: '#163d33' },
+  { key: 'ruby', hex: '#4a151b' },
+  { key: 'charcoal', hex: '#22252a' }
 ];
 
 const BG_PRESETS = [
@@ -348,7 +370,17 @@ function render() {
     }
     for (const p of items) body.append(renderCard(p));
   }
+  applyColOrder();
   renderStats();
+}
+
+function applyColOrder() {
+  const board = document.querySelector('.board');
+  const cols = state.settings.colOrder || SECTIONS;
+  cols.forEach(colId => {
+    const section = document.querySelector(`.column[data-col="${colId}"]`);
+    if (section) board.appendChild(section);
+  });
 }
 
 function renderStats() {
@@ -460,11 +492,27 @@ function renderCard(p) {
   const extras = renderCardExtras(p);
   if (extras) card.append(extras);
 
+  const stageSelect = el('select', {
+    class: 'stage-pill stage-select',
+    onclick: (e) => e.stopPropagation()
+  });
+  for (const k of STAGE_KEYS) {
+    const opt = el('option', { value: k, text: t(`stages.${k}`) });
+    if (k === p.stage) opt.selected = true;
+    stageSelect.append(opt);
+  }
+  stageSelect.addEventListener('change', async (e) => {
+    p.stage = e.target.value;
+    p.updatedAt = new Date().toISOString();
+    await persistProjects();
+    render();
+  });
+
   card.append(
     el(
       'div',
       { class: 'card-foot' },
-      el('span', { class: 'stage-pill', text: t(`stages.${p.stage}`) }),
+      stageSelect,
       folderBtn
     )
   );
@@ -923,6 +971,61 @@ async function handleDrop(bodyEl, clientY) {
 }
 
 function wireColumnDnD() {
+  let draggedCol = null;
+
+  document.querySelectorAll('.column').forEach(col => {
+    const head = col.querySelector('.col-head');
+    
+    head.addEventListener('dragstart', (e) => {
+      // Don't drag if we're interacting with a child (like button or editable title focus)
+      if (e.target !== head && e.target.tagName !== 'H2') {
+        e.preventDefault();
+        return;
+      }
+      draggedCol = col.dataset.col;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setDragImage(col, 20, 20);
+      col.classList.add('dragging-col');
+    });
+
+    head.addEventListener('dragend', () => {
+      draggedCol = null;
+      col.classList.remove('dragging-col');
+      document.querySelectorAll('.column').forEach(c => c.classList.remove('drag-over-col'));
+    });
+
+    col.addEventListener('dragover', (e) => {
+      if (draggedCol && draggedCol !== col.dataset.col) {
+        e.preventDefault();
+        col.classList.add('drag-over-col');
+      }
+    });
+
+    col.addEventListener('dragleave', (e) => {
+      if (!col.contains(e.relatedTarget)) {
+        col.classList.remove('drag-over-col');
+      }
+    });
+
+    col.addEventListener('drop', async (e) => {
+      if (draggedCol && draggedCol !== col.dataset.col) {
+        e.preventDefault();
+        col.classList.remove('drag-over-col');
+        
+        let cols = Array.from(state.settings.colOrder || SECTIONS);
+        const fromIdx = cols.indexOf(draggedCol);
+        const toIdx = cols.indexOf(col.dataset.col);
+        
+        cols.splice(fromIdx, 1);
+        cols.splice(toIdx, 0, draggedCol);
+        
+        state.settings.colOrder = cols;
+        await persistSettings();
+        applyColOrder();
+      }
+    });
+  });
+
   for (const sec of SECTIONS) {
     const body = document.getElementById(`col-${sec}`);
     body.addEventListener('dragover', (e) => {
@@ -940,6 +1043,7 @@ function wireColumnDnD() {
       }
     });
     body.addEventListener('drop', async (e) => {
+      if (!dragState) return;
       e.preventDefault();
       body.classList.remove('drag-over');
       hideDropIndicator();
@@ -1217,6 +1321,15 @@ function applyLocale() {
   document.querySelectorAll('[data-i18n]').forEach((n) => {
     n.textContent = t(n.getAttribute('data-i18n'));
   });
+  
+  // Custom column titles
+  document.querySelectorAll('.col-title').forEach((n) => {
+    const colId = n.dataset.col;
+    if (state.settings.colNames && state.settings.colNames[colId]) {
+      n.textContent = state.settings.colNames[colId];
+    }
+  });
+
   document.querySelectorAll('[data-i18n-title]').forEach((n) => {
     n.setAttribute('title', t(n.getAttribute('data-i18n-title')));
   });
@@ -1393,6 +1506,31 @@ function wireEvents() {
     $('#f-target').value = '';
   });
 
+  document.querySelectorAll('.col-title').forEach(el => {
+    el.addEventListener('focus', () => {
+      el.closest('.col-head').draggable = false;
+    });
+    el.addEventListener('blur', async () => {
+      el.closest('.col-head').draggable = true;
+      const colId = el.dataset.col;
+      if (!state.settings.colNames) state.settings.colNames = {};
+      const newName = el.textContent.trim();
+      if (newName) {
+        state.settings.colNames[colId] = newName;
+      } else {
+        el.textContent = t(colId === 'ongoing' ? 'colOngoing' : colId === 'future' ? 'colFuture' : 'colCompleted');
+        delete state.settings.colNames[colId];
+      }
+      await persistSettings();
+    });
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        el.blur();
+      }
+    });
+  });
+
   $('#modal-close').addEventListener('click', closeModal);
   $('#modal-cancel').addEventListener('click', closeModal);
   $('#modal-save').addEventListener('click', saveFromModal);
@@ -1503,6 +1641,7 @@ function migrateProjects() {
     if (!Array.isArray(state.data[sec])) state.data[sec] = [];
     for (const p of state.data[sec]) {
       if (p.stage && STAGE_LEGACY[p.stage]) p.stage = STAGE_LEGACY[p.stage];
+      if (p.stage === 'drafting') p.stage = 'literature';
       if (!STAGE_KEYS.includes(p.stage)) p.stage = 'planning';
       if (!p.type) p.type = 'undecided';
       if (!TYPE_KEYS.includes(p.type)) p.type = 'undecided';
