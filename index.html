@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hipotez</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+  <script src="https://unpkg.com/mathlive"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body data-bg="charcoal">
+  <!-- Custom Title Bar -->
+  <div class="titlebar" id="titlebar">
+    <div class="titlebar-drag-region"></div>
+    <div class="titlebar-controls">
+      <button class="titlebar-btn" id="btn-minimize" title="Simge Durumuna Küçült">
+        <svg viewBox="0 0 10 10"><path d="M 1 5 L 9 5" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button class="titlebar-btn" id="btn-maximize" title="Tam Ekran">
+        <svg viewBox="0 0 10 10"><path d="M 2 2 L 8 2 L 8 8 L 2 8 Z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button class="titlebar-btn btn-close" id="btn-close" title="Kapat">
+        <svg viewBox="0 0 10 10"><path d="M 2 2 L 8 8 M 8 2 L 2 8" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand">
+      <img class="logo-img" src="assets/logo2.png" alt="Hipotez" draggable="false" />
+      <div class="brand-text">
+        <h1>Hipotez</h1>
+        <span class="brand-sub" data-i18n="appSub">Akademik Çalışma Planlayıcı</span>
+      </div>
+    </div>
+    <div class="top-stats" id="top-stats">
+      <div class="stat-chip" data-stat="ongoing" title="">
+        <span class="stat-dot stat-ongoing"></span>
+        <span class="stat-label" data-i18n="statsOngoing">Devam</span>
+        <span class="stat-val" id="stat-ongoing">0</span>
+      </div>
+      <div class="stat-chip" data-stat="future" title="">
+        <span class="stat-dot stat-future"></span>
+        <span class="stat-label" data-i18n="statsFuture">Gelecek</span>
+        <span class="stat-val" id="stat-future">0</span>
+      </div>
+      <div class="stat-chip" data-stat="completed" title="">
+        <span class="stat-dot stat-completed"></span>
+        <span class="stat-label" data-i18n="statsCompleted">Bitmiş</span>
+        <span class="stat-val" id="stat-completed">0</span>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn-lg" id="open-settings" title="Ayarlar" data-i18n-title="settingsTitle">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="filterbar">
+    <div class="filter-search">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <path d="M21 21l-4.35-4.35"></path>
+      </svg>
+      <input type="text" id="filter-q" data-i18n-ph="searchPh" placeholder="Ara…" />
+    </div>
+    <select id="filter-type" class="filter-select"></select>
+    <select id="filter-stage" class="filter-select"></select>
+    <button class="ghost" id="filter-clear" data-i18n="filterClear">Filtreleri Temizle</button>
+  </div>
+
+  <main class="board">
+    <section class="column" data-col="ongoing">
+      <header class="col-head">
+        <h2 data-i18n="colOngoing" class="col-title" data-col="ongoing" contenteditable="true" spellcheck="false">Üzerinde Çalışılan</h2>
+        <button class="add-btn" data-add="ongoing" data-i18n-title="addProject" title="Yeni proje ekle">+</button>
+      </header>
+      <div class="col-body" id="col-ongoing"></div>
+    </section>
+
+    <section class="column" data-col="future">
+      <header class="col-head">
+        <h2 data-i18n="colFuture" class="col-title" data-col="future" contenteditable="true" spellcheck="false">Gelecek Projeler</h2>
+        <button class="add-btn" data-add="future" data-i18n-title="addProject" title="Yeni proje ekle">+</button>
+      </header>
+      <div class="col-body" id="col-future"></div>
+    </section>
+
+    <section class="column" data-col="completed">
+      <header class="col-head">
+        <h2 data-i18n="colCompleted" class="col-title" data-col="completed" contenteditable="true" spellcheck="false">Bitmiş Projeler</h2>
+        <button class="add-btn" data-add="completed" data-i18n-title="addProject" title="Yeni proje ekle">+</button>
+      </header>
+      <div class="col-body" id="col-completed"></div>
+    </section>
+  </main>
+
+  <footer class="appfoot">
+    <span id="foot-text"></span>
+  </footer>
+
+  <!-- Project modal -->
+  <div class="modal-backdrop hidden" id="modal">
+    <div class="modal">
+      <header class="modal-head">
+        <h3 id="modal-title" data-i18n="modalNew">Yeni Proje</h3>
+        <button class="icon-btn" id="modal-close" title="Kapat">×</button>
+      </header>
+      <div class="modal-body">
+        <label>
+          <span data-i18n="fName">Proje Adı</span>
+          <input type="text" id="f-name" data-i18n-ph="fNamePh" placeholder="Örn. İşsizlik histerezisi" />
+        </label>
+        <label>
+          <span data-i18n="fCoauthors">Ortak Yazarlar</span>
+          <input type="text" id="f-coauthors" data-i18n-ph="fCoauthorsPh" placeholder="Virgülle ayırın" />
+        </label>
+        <label>
+          <span data-i18n="fType">Proje Tipi</span>
+          <select id="f-type"></select>
+        </label>
+        <label>
+          <span data-i18n="fStage">Aşama</span>
+          <select id="f-stage"></select>
+        </label>
+        <label>
+          <span data-i18n="fSection">Bölüm</span>
+          <select id="f-section">
+            <option value="ongoing" data-i18n="colOngoing">Üzerinde Çalışılan</option>
+            <option value="future" data-i18n="colFuture">Gelecek Projeler</option>
+            <option value="completed" data-i18n="colCompleted">Bitmiş Projeler</option>
+          </select>
+        </label>
+        <label>
+          <span data-i18n="fFolder">Klasör</span>
+          <div class="folder-row">
+            <input type="text" id="f-folder" data-i18n-ph="fFolderNone" placeholder="Henüz seçilmedi" readonly />
+            <button class="secondary" id="f-folder-pick" data-i18n="fFolderPick">Seç…</button>
+            <button class="secondary" id="f-folder-clear" title="Temizle">✕</button>
+          </div>
+        </label>
+        <label>
+          <span data-i18n="fTargetDate">Hedef Tarih</span>
+          <div class="folder-row">
+            <input type="date" id="f-target" />
+            <button class="secondary" id="f-target-clear" title="Temizle">✕</button>
+          </div>
+        </label>
+        <label>
+          <span data-i18n="fNotes">Notlar</span>
+          <textarea id="f-notes" data-i18n-ph="fNotesPh" placeholder="Serbest metin…" rows="3"></textarea>
+        </label>
+        <label>
+          <span data-i18n="fColor">Kart Rengi</span>
+          <div class="color-chips" id="f-color-chips"></div>
+        </label>
+        <div class="meta-info" id="f-meta"></div>
+      </div>
+      <footer class="modal-foot">
+        <button class="ghost danger" id="modal-delete" data-i18n="btnDelete">Sil</button>
+        <div class="spacer"></div>
+        <button class="ghost" id="modal-cancel" data-i18n="btnCancel">Vazgeç</button>
+        <button class="primary" id="modal-save" data-i18n="btnSave">Kaydet</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Settings modal -->
+  <div class="modal-backdrop hidden" id="settings-modal">
+    <div class="modal">
+      <header class="modal-head">
+        <h3 data-i18n="settingsTitle">Ayarlar</h3>
+        <button class="icon-btn" id="settings-close" title="Kapat">×</button>
+      </header>
+      <div class="modal-body">
+        <label>
+          <span data-i18n="settingsFont">Yazı Boyutu</span>
+          <div class="range-row">
+            <input type="range" id="s-font" min="0.9" max="1.6" step="0.05" />
+            <span class="range-val" id="s-font-val">100%</span>
+          </div>
+        </label>
+        <label>
+          <span data-i18n="settingsBg">Arka Plan Rengi</span>
+          <div class="bg-chips" id="s-bg-chips"></div>
+        </label>
+        <label>
+          <span data-i18n="settingsLang">Dil</span>
+          <select id="s-lang">
+            <option value="tr">Türkçe</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+
+        <div class="section-divider"></div>
+
+        <div class="sync-block">
+          <div class="sync-head">
+            <span class="sync-title" data-i18n="syncTitle">Senkronizasyon</span>
+            <span class="sync-badge" id="s-sync-badge"></span>
+          </div>
+          <div class="sync-hint" data-i18n="syncHint">
+            Veri klasörünü Google Drive / OneDrive / Dropbox içindeki bir klasöre yönlendir; tüm bilgisayarlarında aynı klasörü seç, otomatik senkronize olsun.
+          </div>
+          <div class="sync-path" id="s-sync-path"></div>
+          <div class="sync-actions">
+            <button class="secondary" id="s-pick-folder" data-i18n="syncPick">Veri Klasörünü Seç…</button>
+            <button class="ghost" id="s-clear-folder" data-i18n="syncClear">Yerel Klasöre Dön</button>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="sync-block">
+          <div class="sync-head">
+            <span class="sync-title" data-i18n="backupTitle">Yedekleme</span>
+          </div>
+          <div class="sync-hint" data-i18n="backupHint">
+            Tüm projeleri ve ayarları tek bir JSON dosyasına aktar veya bir yedekten içe aktar.
+          </div>
+          <div class="sync-actions">
+            <button class="secondary" id="s-export" data-i18n="backupExport">Dışa Aktar…</button>
+            <button class="secondary" id="s-import" data-i18n="backupImport">İçe Aktar…</button>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="sync-block">
+          <div class="sync-head">
+            <span class="sync-title">Veri Taşıma</span>
+          </div>
+          <div class="sync-hint">
+            V1 sürümünden kalan eski (düz metin) notlarınızı yeni nesil Beyaz Tahta sistemine topluca dönüştürün.
+          </div>
+          <div class="sync-actions">
+            <button class="secondary" id="s-migrate-notes">Tüm Eski Notları Tahtaya Aktar</button>
+          </div>
+        </div>
+      </div>
+      <footer class="modal-foot">
+        <div class="spacer"></div>
+        <button class="primary" id="settings-done" data-i18n="btnClose">Kapat</button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- PIN modal -->
+  <div class="modal-backdrop hidden" id="pin-modal">
+    <div class="modal" style="width: 22rem;">
+      <header class="modal-head">
+        <h3 id="pin-title">Şifre Girin</h3>
+        <button class="icon-btn" id="pin-close" title="Kapat">×</button>
+      </header>
+      <div class="modal-body">
+        <p id="pin-desc" style="font-size: 0.85rem; color: var(--text-dim); margin-top: 0;"></p>
+        <input type="password" id="pin-input" class="pin-input" maxlength="4" placeholder="••••" style="text-align: center; font-size: 2rem; letter-spacing: 0.5rem;" />
+        <div id="pin-error" style="color: var(--danger); font-size: 0.8rem; text-align: center; height: 1rem;"></div>
+      </div>
+      <footer class="modal-foot">
+        <div class="spacer"></div>
+        <button class="primary" id="pin-submit" data-i18n="btnDone">Tamam</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Whiteboard Modal -->
+  <div class="whiteboard-backdrop hidden" id="whiteboard-modal">
+    <div class="whiteboard-container">
+      <header class="whiteboard-header" id="wb-header">
+        <div class="wb-brand">
+          <span class="wb-color-indicator" id="wb-color"></span>
+          <h3 id="wb-title">Proje Beyaz Tahtası</h3>
+        </div>
+        <div class="wb-text-tools hidden" id="wb-text-tools" style="display: flex; gap: 0.5rem; margin-right: auto; margin-left: 2rem;">
+          <button class="icon-btn" id="wb-font-bold" title="Kalın (Bold)"><b>B</b></button>
+          <button class="icon-btn" id="wb-font-italic" title="İtalik (Italic)"><i>I</i></button>
+          <input type="number" id="wb-font-size" value="24" min="10" max="120" style="width: 50px; text-align: center; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 4px;" title="Punto (Font Size)">
+        </div>
+        <div class="wb-tools">
+          <button class="icon-btn-lg" id="wb-tool-select" title="Seç (Select)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/></svg>
+          </button>
+          <button class="icon-btn-lg" id="wb-tool-draw" title="Serbest Çizim (Draw)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+          </button>
+          <button class="icon-btn-lg" id="wb-add-text" title="Metin Ekle (Text)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+          </button>
+          <button class="icon-btn-lg" id="wb-add-rect" title="Dikdörtgen Ekle (Rectangle)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+          </button>
+          <button class="icon-btn-lg" id="wb-add-circle" title="Çember Ekle (Circle)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+          </button>
+          <button class="icon-btn-lg" id="wb-add-image" title="Resim Ekle (Add Image)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </button>
+          <button class="icon-btn-lg" id="wb-add-math" title="Denklem Ekle (Add Math)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18 6H8.83l6 6-6 6H18v2H6v-2l6-6-6-6V4h12v2z"/></svg>
+          </button>
+          <div style="width:1px; height:20px; background:var(--border); margin:0 8px;"></div>
+          <button class="icon-btn-lg" id="wb-theme-toggle" title="Tahta Temasını Değiştir (Light/Dark)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </button>
+          <button class="icon-btn-lg" id="wb-maximize" title="Tam Ekran (Maximize)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+          </button>
+          <div style="width:1px; height:20px; background:var(--border); margin:0 8px;"></div>
+          <button class="icon-btn-lg" id="wb-export-pdf" title="PDF Olarak Kaydet">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          </button>
+          <button class="icon-btn-lg" id="wb-close" title="Kapat">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </header>
+      <div class="wb-body" id="wb-body">
+        <canvas id="wb-canvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+{
+  "name": "hipotez",
+  "version": "2.2.0",
+  "description": "Academic project planner — Hipotez",
+  "main": "main.js",
+  "author": {
+    "name": "Mehmet Özcan",
+    "url": "https://www.ozcanmehmet.com"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "homepage": "https://github.com/mehmet-ozcan/hipotez#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mehmet-ozcan/hipotez.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mehmet-ozcan/hipotez/issues"
+  },
+  "keywords": [
+    "academic",
+    "research",
+    "project-management",
+    "kanban",
+    "electron",
+    "desktop"
+  ],
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --x64"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.hipotez.planner",
+    "productName": "Hipotez",
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "renderer.js",
+      "styles.css",
+      "assets/**"
+    ],
+    "win": {
+      "icon": "assets/app-icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Hipotez",
+      "installerIcon": "assets/app-icon.ico",
+      "uninstallerIcon": "assets/app-icon.ico",
+      "installerHeaderIcon": "assets/app-icon.ico"
+    }
+  }
+}
