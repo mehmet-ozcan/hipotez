@@ -2,17 +2,34 @@
 const I18N = {
   tr: {
     appSub: 'Akademik Çalışma Planlayıcı',
+    navResearch: 'Araştırma',
+    navCourses: 'Dersler',
+    navAdvising: 'Danışmanlık',
+    navRefereeing: 'Hakemlik',
+    navArchive: 'Arşiv',
     colOngoing: 'Üzerinde Çalışılan',
     colFuture: 'Gelecek Projeler',
     colCompleted: 'Bitmiş Projeler',
-    addProject: 'Yeni proje ekle',
+    colUg: 'Lisans',
+    colMs: 'Yüksek Lisans',
+    colPhd: 'Doktora',
+    colRefMain: 'Aktif Hakemlikler',
+    newColumn: 'Yeni Sütun',
+    addColumn: 'Sütun ekle',
+    delColumn: 'Sütunu sil (yalnızca boş sütunlar silinebilir)',
+    addProject: 'Yeni kart ekle',
     settingsTitle: 'Ayarlar',
-    modalNew: 'Yeni Proje',
-    modalEdit: 'Projeyi Düzenle',
-    empty: 'Henüz proje yok',
+    modalNew: 'Yeni Kart',
+    modalEdit: 'Kartı Düzenle',
+    empty: 'Henüz kart yok',
     fName: 'Proje Adı',
+    fNameCourse: 'Ders Adı',
+    fNameAdvise: 'Tez / Öğrenci Çalışması',
+    fNameRef: 'Makale / Hakemlik Görevi',
     fNamePh: 'Örn. İşsizlik histerezisi',
     fCoauthors: 'Ortak Yazarlar',
+    fStudent: 'Öğrenci',
+    fJournal: 'Dergi',
     fCoauthorsPh: 'Virgülle ayırın',
     fType: 'Proje Tipi',
     fStage: 'Aşama',
@@ -26,10 +43,12 @@ const I18N = {
     btnDelete: 'Sil',
     btnClose: 'Kapat',
     metaCoauthors: 'Ortak:',
+    metaStudent: 'Öğrenci:',
+    metaJournal: 'Dergi:',
     metaNone: '—',
     openFolder: 'Klasörü Aç',
     noFolder: 'Klasör yok',
-    folderNotFound: 'Bu klasör yolu bulunamadı. Farklı bir bilgisayarda mı oluşturdunuz?',
+    folderNotFound: 'Bu klasör yolu bulunamadı. Diğer sürücüler de tarandı ancak eşleşen klasör yok.',
     settingsFont: 'Yazı Boyutu',
     settingsBg: 'Arka Plan Rengi',
     settingsLang: 'Dil',
@@ -47,24 +66,31 @@ const I18N = {
       'Tüm projeleri ve ayarları tek bir JSON dosyasına aktar veya bir yedekten içe aktar.',
     backupExport: 'Dışa Aktar…',
     backupImport: 'İçe Aktar…',
+    migrateTitle: 'Veri Taşıma',
+    migrateHint: 'V1 sürümünden kalan eski (düz metin) notlarınızı yeni nesil Beyaz Tahta sistemine topluca dönüştürün.',
+    migrateBtn: 'Tüm Eski Notları Tahtaya Aktar',
+    migratedToast: '{n} karttaki eski notlar tahtaya aktarıldı.',
+    migratedNone: 'Aktarılacak eski not bulunamadı.',
     toastSyncSet: 'Veri klasörü ayarlandı',
     toastSyncCleared: 'Yerel klasöre dönüldü',
     toastExported: 'Yedek kaydedildi',
     toastImported: 'Yedek içe aktarıldı',
     toastExternalChange: 'Veriler başka bir cihazdan güncellendi',
     toastImportInvalid: 'Dosya geçerli bir Hipotez yedeği değil',
+    toastArchived: 'Kart arşive taşındı',
+    toastRestored: 'Kart panoya geri yüklendi',
     searchPh: 'Ara…',
     filterAll: 'Tümü',
     filterAllTypes: 'Tüm Tipler',
     filterAllStages: 'Tüm Aşamalar',
     filterClear: 'Filtreleri Temizle',
-    emptyFiltered: 'Filtreye uyan proje yok',
+    emptyFiltered: 'Filtreye uyan kart yok',
     fNotes: 'Notlar',
     fNotesPh: 'Serbest metin…',
     btnLock: 'Gizle',
     btnUnlock: 'Kilidi Aç',
     pinTitleSet: 'Şifre Belirle',
-    pinDescSet: 'İlk gizli dosyanız için 4 haneli bir şifre belirleyin.',
+    pinDescSet: 'İlk gizli kartınız için 4 haneli bir şifre belirleyin.',
     pinTitleEnter: 'Şifre Girin',
     pinDescEnter: 'Gizli kartları açmak için şifrenizi girin.',
     pinErrorLength: 'Şifre 4 haneli olmalıdır.',
@@ -81,10 +107,21 @@ const I18N = {
     metaCreated: 'Oluşturuldu',
     metaUpdated: 'Son güncelleme',
     metaStart: 'Başlangıç',
-    statsOngoing: 'Devam',
-    statsFuture: 'Gelecek',
-    statsCompleted: 'Bitmiş',
     statsTotal: 'Toplam',
+    btnArchiveCard: 'Arşive Kaldır',
+    archPickTitle: 'Hangi kategoriye?',
+    archiveTitle: 'Arşiv Odası',
+    archResearch: 'Araştırma Arşivi',
+    archRefereeing: 'Hakemlik Arşivi',
+    archAbandoned: 'Terk Edilenler',
+    archPublished: 'Yayınlananlar',
+    archAccepted: 'Kabul Edilenler',
+    archRejected: 'Reddedilenler',
+    archivedAtLabel: 'Arşivlendi',
+    btnRestore: 'Geri Yükle',
+    btnDeletePerm: 'Kalıcı Sil',
+    confirmDeletePerm: 'Bu kart kalıcı olarak silinsin mi? Bu işlem geri alınamaz.',
+    emptyArchiveCat: 'Bu kategoride kart yok',
     stages: {
       idea: 'Fikir',
       planning: 'Planlama',
@@ -104,23 +141,38 @@ const I18N = {
       research: 'Araştırma Projesi',
       undecided: 'Belirsiz'
     },
-    footerSuffix: ' tarafından geliştirilmiştir. Tüm hakları saklıdır.',
-    footerName: 'Doç. Dr. Mehmet Özcan',
     wbTitle: 'Proje Tahtası'
   },
   en: {
     appSub: 'Academic Project Planner',
+    navResearch: 'Research',
+    navCourses: 'Courses',
+    navAdvising: 'Advising',
+    navRefereeing: 'Refereeing',
+    navArchive: 'Archive',
     colOngoing: 'In Progress',
     colFuture: 'Future Projects',
     colCompleted: 'Completed Projects',
-    addProject: 'Add new project',
+    colUg: 'Undergraduate',
+    colMs: "Master's",
+    colPhd: 'PhD',
+    colRefMain: 'Active Reviews',
+    newColumn: 'New Column',
+    addColumn: 'Add column',
+    delColumn: 'Delete column (only empty columns can be deleted)',
+    addProject: 'Add new card',
     settingsTitle: 'Settings',
-    modalNew: 'New Project',
-    modalEdit: 'Edit Project',
-    empty: 'No projects yet',
+    modalNew: 'New Card',
+    modalEdit: 'Edit Card',
+    empty: 'No cards yet',
     fName: 'Project Name',
+    fNameCourse: 'Course Name',
+    fNameAdvise: 'Thesis / Student Work',
+    fNameRef: 'Paper / Review Task',
     fNamePh: 'e.g. Unemployment hysteresis',
     fCoauthors: 'Co-authors',
+    fStudent: 'Student',
+    fJournal: 'Journal',
     fCoauthorsPh: 'Comma separated',
     fType: 'Project Type',
     fStage: 'Stage',
@@ -134,10 +186,12 @@ const I18N = {
     btnDelete: 'Delete',
     btnClose: 'Close',
     metaCoauthors: 'Co-authors:',
+    metaStudent: 'Student:',
+    metaJournal: 'Journal:',
     metaNone: '—',
     openFolder: 'Open Folder',
     noFolder: 'No folder',
-    folderNotFound: 'This folder path was not found. Was it created on a different computer?',
+    folderNotFound: 'This folder path was not found. Other drives were also scanned, but no match exists.',
     settingsFont: 'Font Size',
     settingsBg: 'Background Color',
     settingsLang: 'Language',
@@ -155,24 +209,31 @@ const I18N = {
       'Export all projects and settings to a single JSON file, or import from a backup.',
     backupExport: 'Export…',
     backupImport: 'Import…',
+    migrateTitle: 'Data Migration',
+    migrateHint: 'Convert plain-text notes left over from V1 into the new Whiteboard system in bulk.',
+    migrateBtn: 'Move All Legacy Notes to Whiteboards',
+    migratedToast: 'Legacy notes on {n} cards were moved to whiteboards.',
+    migratedNone: 'No legacy notes found to migrate.',
     toastSyncSet: 'Data folder updated',
     toastSyncCleared: 'Switched back to local folder',
     toastExported: 'Backup saved',
     toastImported: 'Backup imported',
     toastExternalChange: 'Data updated from another device',
     toastImportInvalid: 'File is not a valid Hipotez backup',
+    toastArchived: 'Card archived',
+    toastRestored: 'Card restored to board',
     searchPh: 'Search…',
     filterAll: 'All',
     filterAllTypes: 'All Types',
     filterAllStages: 'All Stages',
     filterClear: 'Clear Filters',
-    emptyFiltered: 'No projects match the filter',
+    emptyFiltered: 'No cards match the filter',
     fNotes: 'Notes',
     fNotesPh: 'Free text…',
     btnLock: 'Hide',
     btnUnlock: 'Unlock',
     pinTitleSet: 'Set PIN',
-    pinDescSet: 'Set a 4-digit PIN for your first hidden project.',
+    pinDescSet: 'Set a 4-digit PIN for your first hidden card.',
     pinTitleEnter: 'Enter PIN',
     pinDescEnter: 'Enter your PIN to unlock hidden cards.',
     pinErrorLength: 'PIN must be 4 digits.',
@@ -189,10 +250,21 @@ const I18N = {
     metaCreated: 'Created',
     metaUpdated: 'Last updated',
     metaStart: 'Start',
-    statsOngoing: 'Ongoing',
-    statsFuture: 'Future',
-    statsCompleted: 'Done',
     statsTotal: 'Total',
+    btnArchiveCard: 'Archive',
+    archPickTitle: 'Which category?',
+    archiveTitle: 'Archive Room',
+    archResearch: 'Research Archive',
+    archRefereeing: 'Refereeing Archive',
+    archAbandoned: 'Abandoned',
+    archPublished: 'Published',
+    archAccepted: 'Accepted',
+    archRejected: 'Declined',
+    archivedAtLabel: 'Archived',
+    btnRestore: 'Restore',
+    btnDeletePerm: 'Delete Permanently',
+    confirmDeletePerm: 'Delete this card permanently? This cannot be undone.',
+    emptyArchiveCat: 'No cards in this category',
     stages: {
       idea: 'Idea',
       planning: 'Planning',
@@ -212,12 +284,9 @@ const I18N = {
       research: 'Research Project',
       undecided: 'Undecided'
     },
-    footerSuffix: '. All rights reserved.',
-    footerName: 'Developed by Assoc. Prof. Dr. Mehmet Özcan',
     wbTitle: 'Project Board'
   }
 };
-
 
 const STAGE_KEYS = [
   'idea',
@@ -288,19 +357,50 @@ const BG_PRESETS = [
   { key: 'plum', swatch: '#130f1a' }
 ];
 
-const SECTIONS = ['ongoing', 'future', 'completed'];
+const SECTIONS_V2 = ['ongoing', 'future', 'completed'];
+const BOARD_KEYS = ['research', 'courses', 'advising', 'refereeing'];
+
+// Per-board behavior. `fixedCols`: column set can't grow/shrink (research keeps
+// its 3-stage flow). `archive`: which archive room this board's cards go to.
+const BOARD_DEFS = {
+  research: {
+    fixedCols: true, maxCols: 3, hasTypeStage: true, compact: false,
+    archive: 'research', nameLabel: 'fName', peopleLabel: 'fCoauthors', peopleMeta: 'metaCoauthors'
+  },
+  courses: {
+    fixedCols: false, maxCols: 4, hasTypeStage: false, compact: false,
+    archive: null, nameLabel: 'fNameCourse', peopleLabel: 'fCoauthors', peopleMeta: 'metaCoauthors'
+  },
+  advising: {
+    fixedCols: false, maxCols: 4, hasTypeStage: false, compact: false,
+    archive: null, nameLabel: 'fNameAdvise', peopleLabel: 'fStudent', peopleMeta: 'metaStudent'
+  },
+  refereeing: {
+    fixedCols: false, maxCols: 4, hasTypeStage: false, compact: true,
+    archive: 'refereeing', nameLabel: 'fNameRef', peopleLabel: 'fJournal', peopleMeta: 'metaJournal'
+  }
+};
+
+const ARCHIVE_DEFS = {
+  research: { titleKey: 'archResearch', cats: { abandoned: 'archAbandoned', published: 'archPublished' } },
+  refereeing: { titleKey: 'archRefereeing', cats: { accepted: 'archAccepted', rejected: 'archRejected' } }
+};
 
 // ----------------- State -----------------
 const state = {
-  data: { ongoing: [], future: [], completed: [] },
+  data: null, // v3: { schema, boards, archives }
   settings: { fontScale: 1, bgPreset: 'charcoal', language: 'tr' },
+  page: 'research', // research | courses | advising | refereeing | archive
+  archiveTab: 'research',
   editing: null,
   filters: { q: '', type: 'all', stage: 'all' },
-  unlockTarget: null
+  unlockTarget: null,
+  pendingExternalReload: false
 };
 
 // Drag-and-drop state
-let dragState = null; // { id, fromSection }
+let dragState = null; // { id, fromCol }
+let colDragId = null;
 let suppressClickUntil = 0;
 
 const $ = (sel) => document.querySelector(sel);
@@ -324,6 +424,204 @@ const t = (key) => {
   return key.split('.').reduce((o, k) => (o ? o[k] : undefined), dict) ?? key;
 };
 
+async function sha256Hex(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ----------------- Data model (schema 3) -----------------
+
+function defaultBoards() {
+  return {
+    research: {
+      columns: [
+        { id: 'ongoing', nameKey: 'colOngoing', name: null, cards: [] },
+        { id: 'future', nameKey: 'colFuture', name: null, cards: [] },
+        { id: 'completed', nameKey: 'colCompleted', name: null, cards: [] }
+      ]
+    },
+    courses: {
+      columns: [
+        { id: 'crs-ug', nameKey: 'colUg', name: null, cards: [] },
+        { id: 'crs-ms', nameKey: 'colMs', name: null, cards: [] },
+        { id: 'crs-phd', nameKey: 'colPhd', name: null, cards: [] }
+      ]
+    },
+    advising: {
+      columns: [
+        { id: 'adv-ms', nameKey: 'colMs', name: null, cards: [] },
+        { id: 'adv-phd', nameKey: 'colPhd', name: null, cards: [] }
+      ]
+    },
+    refereeing: {
+      columns: [{ id: 'ref-main', nameKey: 'colRefMain', name: null, cards: [] }]
+    }
+  };
+}
+
+function defaultArchives() {
+  return {
+    research: {
+      abandoned: { name: null, cards: [] },
+      published: { name: null, cards: [] }
+    },
+    refereeing: {
+      accepted: { name: null, cards: [] },
+      rejected: { name: null, cards: [] }
+    }
+  };
+}
+
+// Upgrade whatever came off disk (v2 {ongoing,future,completed} or partial v3)
+// to a complete schema-3 structure. Returns true if anything was changed.
+function ensureV3() {
+  let changed = false;
+  let d = state.data || {};
+
+  if (!d.boards) {
+    const defaults = defaultBoards();
+    const legacyNames = (state.settings && state.settings.colNames) || {};
+    const legacyOrder = Array.isArray(state.settings && state.settings.colOrder)
+      ? state.settings.colOrder
+      : SECTIONS_V2;
+    const keyMap = { ongoing: 'colOngoing', future: 'colFuture', completed: 'colCompleted' };
+    const cols = [];
+    for (const sec of legacyOrder) {
+      if (!keyMap[sec]) continue;
+      cols.push({
+        id: sec,
+        nameKey: keyMap[sec],
+        name: legacyNames[sec] || null,
+        cards: Array.isArray(d[sec]) ? d[sec] : []
+      });
+    }
+    for (const sec of SECTIONS_V2) {
+      if (!cols.find((c) => c.id === sec)) {
+        cols.push({
+          id: sec,
+          nameKey: keyMap[sec],
+          name: legacyNames[sec] || null,
+          cards: Array.isArray(d[sec]) ? d[sec] : []
+        });
+      }
+    }
+    defaults.research.columns = cols;
+    d = { schema: 3, boards: defaults, archives: defaultArchives() };
+    changed = true;
+  }
+
+  const defB = defaultBoards();
+  for (const key of BOARD_KEYS) {
+    if (!d.boards[key] || !Array.isArray(d.boards[key].columns) || d.boards[key].columns.length === 0) {
+      d.boards[key] = defB[key];
+      changed = true;
+    }
+    for (const col of d.boards[key].columns) {
+      if (!Array.isArray(col.cards)) { col.cards = []; changed = true; }
+      if (!col.id) { col.id = uid(); changed = true; }
+    }
+  }
+
+  const defA = defaultArchives();
+  if (!d.archives) { d.archives = defA; changed = true; }
+  for (const key of Object.keys(ARCHIVE_DEFS)) {
+    if (!d.archives[key]) { d.archives[key] = defA[key]; changed = true; }
+    for (const cat of Object.keys(ARCHIVE_DEFS[key].cats)) {
+      if (!d.archives[key][cat]) { d.archives[key][cat] = { name: null, cards: [] }; changed = true; }
+      if (!Array.isArray(d.archives[key][cat].cards)) { d.archives[key][cat].cards = []; changed = true; }
+    }
+  }
+
+  if (d.schema !== 3) { d.schema = 3; changed = true; }
+  state.data = d;
+
+  forAllCards((p) => { if (migrateCard(p)) changed = true; });
+
+  // Legacy settings keys now live in the data file
+  if (state.settings.colNames || state.settings.colOrder) {
+    delete state.settings.colNames;
+    delete state.settings.colOrder;
+    persistSettings();
+  }
+
+  return changed;
+}
+
+function migrateCard(p) {
+  let changed = false;
+  const set = (k, v) => { p[k] = v; changed = true; };
+  if (p.stage && STAGE_LEGACY[p.stage]) set('stage', STAGE_LEGACY[p.stage]);
+  if (p.stage === 'drafting') set('stage', 'literature');
+  if (!STAGE_KEYS.includes(p.stage)) set('stage', 'planning');
+  if (!p.type) set('type', 'undecided');
+  if (!TYPE_KEYS.includes(p.type)) set('type', 'undecided');
+  if (p.notes === undefined) set('notes', '');
+  if (p.targetDate === undefined) set('targetDate', null);
+  if (p.updatedAt === undefined) set('updatedAt', p.createdAt || new Date().toISOString());
+  if (p.startDate === undefined) {
+    set('startDate', p.createdAt ? p.createdAt.slice(0, 10) : new Date().toISOString().slice(0, 10));
+  }
+  if (!p.id) set('id', uid());
+  return changed;
+}
+
+function forAllCards(fn) {
+  const d = state.data;
+  if (!d || !d.boards) return;
+  for (const key of BOARD_KEYS) {
+    for (const col of d.boards[key].columns) col.cards.forEach(fn);
+  }
+  for (const arch of Object.values(d.archives || {})) {
+    for (const cat of Object.values(arch)) {
+      if (cat && Array.isArray(cat.cards)) cat.cards.forEach(fn);
+    }
+  }
+}
+
+function board(key) {
+  return state.data.boards[key || (state.page === 'archive' ? 'research' : state.page)];
+}
+
+// Locate a card anywhere (boards + archives).
+function findCard(id) {
+  const d = state.data;
+  for (const boardKey of BOARD_KEYS) {
+    const cols = d.boards[boardKey].columns;
+    for (let ci = 0; ci < cols.length; ci++) {
+      const idx = cols[ci].cards.findIndex((p) => p.id === id);
+      if (idx !== -1) {
+        return {
+          kind: 'board', boardKey, colIdx: ci, colId: cols[ci].id,
+          index: idx, project: cols[ci].cards[idx], list: cols[ci].cards
+        };
+      }
+    }
+  }
+  for (const archKey of Object.keys(d.archives || {})) {
+    for (const catKey of Object.keys(d.archives[archKey])) {
+      const cat = d.archives[archKey][catKey];
+      if (!cat || !Array.isArray(cat.cards)) continue;
+      const idx = cat.cards.findIndex((p) => p.id === id);
+      if (idx !== -1) {
+        return {
+          kind: 'archive', archKey, catKey,
+          index: idx, project: cat.cards[idx], list: cat.cards
+        };
+      }
+    }
+  }
+  return null;
+}
+
+function columnDisplayName(col) {
+  return col.name || (col.nameKey ? t(col.nameKey) : t('newColumn'));
+}
+
+function archiveCatName(archKey, catKey) {
+  const cat = state.data.archives[archKey][catKey];
+  return (cat && cat.name) || t(ARCHIVE_DEFS[archKey].cats[catKey]);
+}
+
 // ----------------- Persistence -----------------
 async function persistProjects() {
   await window.api.saveProjects(state.data);
@@ -333,16 +631,7 @@ async function persistSettings() {
   await window.api.saveSettings(state.settings);
 }
 
-function findProject(id) {
-  for (const sec of SECTIONS) {
-    const list = state.data[sec];
-    const idx = list.findIndex((p) => p.id === id);
-    if (idx !== -1) return { section: sec, index: idx, project: list[idx] };
-  }
-  return null;
-}
-
-// ----------------- Render: cards -----------------
+// ----------------- Filters -----------------
 function isFilterActive() {
   const f = state.filters;
   return (f.q && f.q.trim()) || f.type !== 'all' || f.stage !== 'all';
@@ -350,8 +639,10 @@ function isFilterActive() {
 
 function matchesFilter(p) {
   const f = state.filters;
-  if (f.type !== 'all' && p.type !== f.type) return false;
-  if (f.stage !== 'all' && p.stage !== f.stage) return false;
+  if (state.page === 'research') {
+    if (f.type !== 'all' && p.type !== f.type) return false;
+    if (f.stage !== 'all' && p.stage !== f.stage) return false;
+  }
   if (f.q && f.q.trim()) {
     const q = f.q.trim().toLowerCase();
     const hay = [p.name, p.coauthors, p.notes]
@@ -363,42 +654,246 @@ function matchesFilter(p) {
   return true;
 }
 
+// ----------------- Render: top level -----------------
 function render() {
-  for (const sec of SECTIONS) {
-    const body = document.getElementById(`col-${sec}`);
-    body.innerHTML = '';
-    const items = state.data[sec].filter(matchesFilter);
-    if (!items.length) {
-      const msg = isFilterActive() ? t('emptyFiltered') : t('empty');
-      body.append(el('div', { class: 'empty', text: msg }));
-      continue;
-    }
-    for (const p of items) body.append(renderCard(p));
+  const boardEl = $('#board');
+  const archiveEl = $('#archive-page');
+  if (state.page === 'archive') {
+    boardEl.classList.add('hidden');
+    archiveEl.classList.remove('hidden');
+    renderArchivePage();
+  } else {
+    archiveEl.classList.add('hidden');
+    boardEl.classList.remove('hidden');
+    renderBoardPage();
   }
-  applyColOrder();
+  renderNav();
   renderStats();
+  updateFilterVisibility();
 }
 
-function applyColOrder() {
-  const board = document.querySelector('.board');
-  const cols = state.settings.colOrder || SECTIONS;
-  cols.forEach(colId => {
-    const section = document.querySelector(`.column[data-col="${colId}"]`);
-    if (section) board.appendChild(section);
+function renderNav() {
+  document.querySelectorAll('.nav-btn').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.page === state.page);
   });
 }
 
 function renderStats() {
-  for (const sec of SECTIONS) {
-    const all = state.data[sec].length;
-    const shown = state.data[sec].filter(matchesFilter).length;
-    const cell = document.getElementById(`stat-${sec}`);
-    if (cell) cell.textContent = isFilterActive() && shown !== all
-      ? `${shown}/${all}`
-      : String(all);
+  const wrap = $('#top-stats');
+  wrap.innerHTML = '';
+  if (state.page === 'archive') {
+    const arch = state.data.archives[state.archiveTab];
+    for (const catKey of Object.keys(ARCHIVE_DEFS[state.archiveTab].cats)) {
+      wrap.append(
+        el('div', { class: 'stat-chip' },
+          el('span', { class: 'stat-dot', 'data-dot': catKey === Object.keys(ARCHIVE_DEFS[state.archiveTab].cats)[0] ? '0' : '1' }),
+          el('span', { class: 'stat-label', text: archiveCatName(state.archiveTab, catKey) }),
+          el('span', { class: 'stat-val', text: String(arch[catKey].cards.length) })
+        )
+      );
+    }
+    return;
+  }
+  const cols = board().columns;
+  cols.forEach((col, i) => {
+    const all = col.cards.length;
+    const shown = col.cards.filter(matchesFilter).length;
+    wrap.append(
+      el('div', { class: 'stat-chip' },
+        el('span', { class: 'stat-dot', 'data-dot': String(i % 4) }),
+        el('span', { class: 'stat-label', text: columnDisplayName(col) }),
+        el('span', {
+          class: 'stat-val',
+          text: isFilterActive() && shown !== all ? `${shown}/${all}` : String(all)
+        })
+      )
+    );
+  });
+}
+
+function updateFilterVisibility() {
+  const showTypeStage = state.page === 'research';
+  $('#filter-type').classList.toggle('hidden', !showTypeStage);
+  $('#filter-stage').classList.toggle('hidden', !showTypeStage);
+}
+
+// ----------------- Render: board page -----------------
+function renderBoardPage() {
+  const boardEl = $('#board');
+  boardEl.innerHTML = '';
+  const def = BOARD_DEFS[state.page];
+  const b = board();
+
+  boardEl.classList.toggle('compact-board', !!def.compact);
+  // Single-column boards shouldn't stretch across the whole window
+  boardEl.dataset.cols = String(b.columns.length);
+
+  for (const col of b.columns) {
+    boardEl.append(renderColumn(col, def, b));
+  }
+
+  if (!def.fixedCols && b.columns.length < def.maxCols) {
+    const addCol = el('button', {
+      class: 'add-col-tile',
+      title: t('addColumn'),
+      onclick: async () => {
+        b.columns.push({ id: uid(), nameKey: null, name: t('newColumn'), cards: [] });
+        await persistProjects();
+        render();
+      }
+    }, el('span', { text: '+' }));
+    boardEl.append(addCol);
   }
 }
 
+function renderColumn(col, def, b) {
+  const section = el('section', { class: 'column' });
+  section.dataset.col = col.id;
+
+  const title = el('h2', {
+    class: 'col-title',
+    contenteditable: 'true',
+    spellcheck: 'false',
+    text: columnDisplayName(col)
+  });
+
+  const head = el('header', { class: 'col-head' });
+  head.draggable = true;
+  head.append(title);
+
+  if (!def.fixedCols && b.columns.length > 1) {
+    const delBtn = el('button', {
+      class: 'col-del-btn',
+      title: t('delColumn'),
+      onclick: async (e) => {
+        e.stopPropagation();
+        if (col.cards.length > 0) return;
+        const i = b.columns.indexOf(col);
+        if (i !== -1) {
+          b.columns.splice(i, 1);
+          await persistProjects();
+          render();
+        }
+      }
+    });
+    delBtn.innerHTML = trashSvg();
+    if (col.cards.length > 0) delBtn.classList.add('disabled');
+    head.append(delBtn);
+  }
+
+  head.append(
+    el('button', {
+      class: 'add-btn',
+      title: t('addProject'),
+      text: '+',
+      onclick: () => openModalForColumn(col.id)
+    })
+  );
+
+  const body = el('div', { class: 'col-body' });
+  body.dataset.colId = col.id;
+
+  const items = col.cards.filter(matchesFilter);
+  if (!items.length) {
+    const msg = isFilterActive() ? t('emptyFiltered') : t('empty');
+    body.append(el('div', { class: 'empty', text: msg }));
+  } else {
+    for (const p of items) body.append(renderCard(p, def));
+  }
+
+  section.append(head, body);
+
+  // --- column title editing ---
+  title.addEventListener('focus', () => { head.draggable = false; });
+  title.addEventListener('blur', async () => {
+    head.draggable = true;
+    const newName = title.textContent.trim();
+    if (newName) {
+      const defName = col.nameKey ? t(col.nameKey) : null;
+      col.name = newName === defName ? null : newName;
+    } else {
+      title.textContent = columnDisplayName(col);
+    }
+    await persistProjects();
+    renderStats();
+  });
+  title.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      title.blur();
+    }
+  });
+
+  // --- column drag (reorder) ---
+  head.addEventListener('dragstart', (e) => {
+    if (e.target !== head && e.target.tagName !== 'H2') {
+      e.preventDefault();
+      return;
+    }
+    colDragId = col.id;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setDragImage(section, 20, 20);
+    section.classList.add('dragging-col');
+  });
+  head.addEventListener('dragend', () => {
+    colDragId = null;
+    section.classList.remove('dragging-col');
+    document.querySelectorAll('.column').forEach((c) => c.classList.remove('drag-over-col'));
+  });
+  section.addEventListener('dragover', (e) => {
+    if (colDragId && colDragId !== col.id) {
+      e.preventDefault();
+      section.classList.add('drag-over-col');
+    }
+  });
+  section.addEventListener('dragleave', (e) => {
+    if (!section.contains(e.relatedTarget)) {
+      section.classList.remove('drag-over-col');
+    }
+  });
+  section.addEventListener('drop', async (e) => {
+    if (colDragId && colDragId !== col.id) {
+      e.preventDefault();
+      section.classList.remove('drag-over-col');
+      const cols = b.columns;
+      const fromIdx = cols.findIndex((c) => c.id === colDragId);
+      const toIdx = cols.findIndex((c) => c.id === col.id);
+      if (fromIdx !== -1 && toIdx !== -1) {
+        const [moved] = cols.splice(fromIdx, 1);
+        cols.splice(toIdx, 0, moved);
+        await persistProjects();
+        render();
+      }
+    }
+  });
+
+  // --- card drop target ---
+  body.addEventListener('dragover', (e) => {
+    if (!dragState) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    body.classList.add('drag-over');
+    const idx = computeDropIndex(body, e.clientY);
+    showDropIndicator(body, idx);
+  });
+  body.addEventListener('dragleave', (e) => {
+    if (!body.contains(e.relatedTarget)) {
+      body.classList.remove('drag-over');
+      hideDropIndicator();
+    }
+  });
+  body.addEventListener('drop', async (e) => {
+    if (!dragState) return;
+    e.preventDefault();
+    body.classList.remove('drag-over');
+    hideDropIndicator();
+    await handleCardDrop(col, body, e.clientY);
+  });
+
+  return section;
+}
+
+// ----------------- Render: cards -----------------
 function folderIconSvg() {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('viewBox', '0 0 24 24');
@@ -416,12 +911,48 @@ function folderIconSvg() {
   return svg;
 }
 
-function renderCard(p) {
+function trashSvg() {
+  return `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="3 6 5 6 21 6"></polyline>
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+  </svg>`;
+}
+
+function archiveBoxSvg() {
+  return `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="21 8 21 21 3 21 3 8"></polyline>
+    <rect x="1" y="3" width="22" height="5"></rect>
+    <line x1="10" y1="12" x2="14" y2="12"></line>
+  </svg>`;
+}
+
+function restoreSvg() {
+  return `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="1 4 1 10 7 10"></polyline>
+    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+  </svg>`;
+}
+
+function lockClosedSvg() {
+  return `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+  </svg>`;
+}
+
+function lockOpenSvg() {
+  return `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+    <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+  </svg>`;
+}
+
+function makeFolderBtn(p, compact) {
   const hasFolder = !!p.folder;
   const folderBtn = el(
     'button',
     {
-      class: 'folder-link',
+      class: 'folder-link' + (compact ? ' compact' : ''),
       title: p.folder || t('noFolder'),
       onclick: async (e) => {
         e.stopPropagation();
@@ -431,12 +962,32 @@ function renderCard(p) {
       }
     },
     folderIconSvg(),
-    document.createTextNode(hasFolder ? t('openFolder') : t('noFolder'))
+    compact ? null : document.createTextNode(hasFolder ? t('openFolder') : t('noFolder'))
   );
   if (!hasFolder) folderBtn.disabled = true;
+  return folderBtn;
+}
 
+function makeArchiveBtn(p, def) {
+  return el('button', {
+    class: 'icon-btn card-archive-btn',
+    title: t('btnArchiveCard'),
+    onclick: (e) => {
+      e.stopPropagation();
+      openArchivePicker(e.currentTarget, p, def.archive);
+    }
+  }, htmlToNode(archiveBoxSvg()));
+}
+
+function htmlToNode(html) {
+  const tpl = document.createElement('template');
+  tpl.innerHTML = html.trim();
+  return tpl.content.firstChild;
+}
+
+function renderCard(p, def) {
   const card = el('div', {
-    class: 'card',
+    class: 'card' + (def.compact ? ' card-compact' : ''),
     onclick: () => {
       if (Date.now() < suppressClickUntil) return;
       if (p.hidden) return; // Gizliyse doğrudan karta tıklanmaz
@@ -444,11 +995,11 @@ function renderCard(p) {
     }
   });
   card.draggable = true;
-  if (p.hidden) {
-    card.classList.add('hidden-card');
-  }
+  if (p.hidden) card.classList.add('hidden-card');
   card.dataset.pid = p.id;
 
+  const cornerBtns = el('div', { class: 'card-corner' });
+  if (def.archive) cornerBtns.append(makeArchiveBtn(p, def));
   const lockBtn = el('button', {
     class: 'icon-btn card-lock-btn',
     title: p.hidden ? t('btnUnlock') : t('btnLock'),
@@ -465,7 +1016,8 @@ function renderCard(p) {
     }
   });
   lockBtn.innerHTML = p.hidden ? lockClosedSvg() : lockOpenSvg();
-  card.append(lockBtn);
+  cornerBtns.append(lockBtn);
+  card.append(cornerBtns);
 
   card.addEventListener('dragstart', (e) => onCardDragStart(e, p.id, card));
   card.addEventListener('dragend', () => onCardDragEnd(card));
@@ -480,7 +1032,20 @@ function renderCard(p) {
 
   card.append(el('div', { class: 'card-title', text: p.name || '(…)' }));
 
-  if (p.type) {
+  if (def.compact) {
+    // Refereeing: small card — journal line + deadline + folder
+    if (p.coauthors && p.coauthors.trim()) {
+      card.append(el('div', { class: 'card-meta compact-meta', text: p.coauthors }));
+    }
+    const foot = el('div', { class: 'card-foot compact-foot' });
+    if (p.targetDate) foot.append(makeDatePill('target', p.targetDate, p));
+    if (p.notes && p.notes.trim() || p.whiteboardData) foot.append(makeNotesPill(p));
+    foot.append(makeFolderBtn(p, true));
+    card.append(foot);
+    return card;
+  }
+
+  if (def.hasTypeStage && p.type) {
     card.append(el('div', { class: 'card-type', text: t(`types.${p.type}`) }));
   }
 
@@ -488,7 +1053,7 @@ function renderCard(p) {
     el(
       'div',
       { class: 'card-meta' },
-      el('span', { class: 'label', text: t('metaCoauthors') + ' ' }),
+      el('span', { class: 'label', text: t(def.peopleMeta) + ' ' }),
       document.createTextNode(
         p.coauthors && p.coauthors.trim() ? p.coauthors : t('metaNone')
       )
@@ -498,30 +1063,27 @@ function renderCard(p) {
   const extras = renderCardExtras(p);
   if (extras) card.append(extras);
 
-  const stageSelect = el('select', {
-    class: 'stage-pill stage-select',
-    onclick: (e) => e.stopPropagation()
-  });
-  for (const k of STAGE_KEYS) {
-    const opt = el('option', { value: k, text: t(`stages.${k}`) });
-    if (k === p.stage) opt.selected = true;
-    stageSelect.append(opt);
+  const foot = el('div', { class: 'card-foot' });
+  if (def.hasTypeStage) {
+    const stageSelect = el('select', {
+      class: 'stage-pill stage-select',
+      onclick: (e) => e.stopPropagation()
+    });
+    for (const k of STAGE_KEYS) {
+      const opt = el('option', { value: k, text: t(`stages.${k}`) });
+      if (k === p.stage) opt.selected = true;
+      stageSelect.append(opt);
+    }
+    stageSelect.addEventListener('change', async (e) => {
+      p.stage = e.target.value;
+      p.updatedAt = new Date().toISOString();
+      await persistProjects();
+      render();
+    });
+    foot.append(stageSelect);
   }
-  stageSelect.addEventListener('change', async (e) => {
-    p.stage = e.target.value;
-    p.updatedAt = new Date().toISOString();
-    await persistProjects();
-    render();
-  });
-
-  card.append(
-    el(
-      'div',
-      { class: 'card-foot' },
-      stageSelect,
-      folderBtn
-    )
-  );
+  foot.append(makeFolderBtn(p, false));
+  card.append(foot);
 
   return card;
 }
@@ -540,8 +1102,8 @@ function renderCardExtras(p) {
   // Target date pill — only if set (status-colored)
   if (p.targetDate) row.append(makeDatePill('target', p.targetDate, p));
 
-  // Notes pill — only if project has notes
-  if (p.notes && p.notes.trim()) row.append(makeNotesPill(p));
+  // Notes pill — opens the whiteboard
+  if ((p.notes && p.notes.trim()) || p.whiteboardData) row.append(makeNotesPill(p));
 
   return row;
 }
@@ -584,7 +1146,7 @@ function makeNotesPill(project) {
     {
       class: 'extra-pill pill-btn',
       type: 'button',
-      title: short,
+      title: short || t('wbTitle'),
       onclick: (e) => {
         e.stopPropagation();
         openWhiteboard(project.id);
@@ -680,21 +1242,187 @@ function notesIconSvg() {
   return svg;
 }
 
-function lockClosedSvg() {
-  return `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-  </svg>`;
+// ----------------- Archive -----------------
+function openArchivePicker(anchor, project, archKey) {
+  closePopover();
+  const pop = el('div', { class: 'popover archive-popover' },
+    el('div', { class: 'pop-title', text: t('archPickTitle') })
+  );
+  for (const catKey of Object.keys(ARCHIVE_DEFS[archKey].cats)) {
+    pop.append(
+      el('button', {
+        class: 'secondary archive-cat-btn',
+        type: 'button',
+        text: archiveCatName(archKey, catKey),
+        onclick: async () => {
+          closePopover();
+          await archiveCard(project.id, archKey, catKey);
+        }
+      })
+    );
+  }
+  positionPopover(pop, anchor);
+  document.addEventListener('mousedown', handlePopoverOutside, true);
+  document.addEventListener('keydown', handlePopoverKey);
 }
 
-function lockOpenSvg() {
-  return `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-    <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
-  </svg>`;
+async function archiveCard(cardId, archKey, catKey) {
+  const found = findCard(cardId);
+  if (!found || found.kind !== 'board') return;
+  const [card] = found.list.splice(found.index, 1);
+  card.archivedAt = new Date().toISOString();
+  card.archivedFrom = found.boardKey;
+  state.data.archives[archKey][catKey].cards.unshift(card);
+  await persistProjects();
+  render();
+  showToast(t('toastArchived'));
 }
 
-// ----------------- Popover (date/notes) -----------------
+async function restoreCard(cardId) {
+  const found = findCard(cardId);
+  if (!found || found.kind !== 'archive') return;
+  const [card] = found.list.splice(found.index, 1);
+  const boardKey = card.archivedFrom && BOARD_KEYS.includes(card.archivedFrom)
+    ? card.archivedFrom
+    : (found.archKey === 'refereeing' ? 'refereeing' : 'research');
+  delete card.archivedAt;
+  delete card.archivedFrom;
+  card.updatedAt = new Date().toISOString();
+  state.data.boards[boardKey].columns[0].cards.unshift(card);
+  await persistProjects();
+  render();
+  showToast(t('toastRestored'));
+}
+
+function renderArchivePage() {
+  const page = $('#archive-page');
+  page.innerHTML = '';
+
+  const tabs = el('div', { class: 'archive-tabs' });
+  for (const archKey of Object.keys(ARCHIVE_DEFS)) {
+    tabs.append(
+      el('button', {
+        class: 'archive-tab' + (state.archiveTab === archKey ? ' active' : ''),
+        text: t(ARCHIVE_DEFS[archKey].titleKey),
+        onclick: () => {
+          state.archiveTab = archKey;
+          render();
+        }
+      })
+    );
+  }
+  page.append(
+    el('div', { class: 'archive-head' },
+      el('h2', { class: 'archive-title', text: t('archiveTitle') }),
+      tabs
+    )
+  );
+
+  const cols = el('div', { class: 'archive-cols' });
+  const archKey = state.archiveTab;
+  for (const catKey of Object.keys(ARCHIVE_DEFS[archKey].cats)) {
+    cols.append(renderArchiveColumn(archKey, catKey));
+  }
+  page.append(cols);
+}
+
+function renderArchiveColumn(archKey, catKey) {
+  const cat = state.data.archives[archKey][catKey];
+  const section = el('section', { class: 'column archive-column' });
+
+  const title = el('h2', {
+    class: 'col-title',
+    contenteditable: 'true',
+    spellcheck: 'false',
+    text: archiveCatName(archKey, catKey)
+  });
+  title.addEventListener('blur', async () => {
+    const newName = title.textContent.trim();
+    if (newName) {
+      cat.name = newName === t(ARCHIVE_DEFS[archKey].cats[catKey]) ? null : newName;
+    } else {
+      title.textContent = archiveCatName(archKey, catKey);
+    }
+    await persistProjects();
+    renderStats();
+  });
+  title.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); title.blur(); }
+  });
+
+  section.append(
+    el('header', { class: 'col-head' },
+      title,
+      el('span', { class: 'arch-count', text: String(cat.cards.length) })
+    )
+  );
+
+  const body = el('div', { class: 'col-body' });
+  const items = cat.cards.filter(matchesFilter);
+  if (!items.length) {
+    body.append(el('div', { class: 'empty', text: t('emptyArchiveCat') }));
+  } else {
+    for (const p of items) body.append(renderArchiveCard(p, archKey));
+  }
+  section.append(body);
+  return section;
+}
+
+function renderArchiveCard(p, archKey) {
+  const card = el('div', { class: 'card archive-card' });
+  if (p.color) {
+    const hex = CARD_COLORS.find((c) => c.key === p.color)?.hex;
+    if (hex) {
+      card.style.backgroundColor = hex;
+      card.dataset.colored = '1';
+    }
+  }
+  card.append(el('div', { class: 'card-title', text: p.name || '(…)' }));
+  if (p.coauthors && p.coauthors.trim()) {
+    card.append(el('div', { class: 'card-meta', text: p.coauthors }));
+  }
+  if (p.archivedAt) {
+    card.append(
+      el('div', { class: 'card-meta arch-date', text: `${t('archivedAtLabel')}: ${formatDateTime(p.archivedAt)}` })
+    );
+  }
+
+  const foot = el('div', { class: 'card-foot arch-foot' });
+  foot.append(
+    el('button', {
+      class: 'extra-pill pill-btn',
+      type: 'button',
+      title: t('btnRestore'),
+      onclick: () => restoreCard(p.id)
+    }, htmlToNode(restoreSvg()), document.createTextNode(' ' + t('btnRestore')))
+  );
+  if (p.whiteboardData || (p.notes && p.notes.trim())) {
+    foot.append(makeNotesPill(p));
+  }
+  if (p.folder) {
+    foot.append(makeFolderBtn(p, true));
+  }
+  foot.append(
+    el('button', {
+      class: 'extra-pill pill-btn danger-pill',
+      type: 'button',
+      title: t('btnDeletePerm'),
+      onclick: async () => {
+        if (!confirm(t('confirmDeletePerm'))) return;
+        const found = findCard(p.id);
+        if (found && found.kind === 'archive') {
+          found.list.splice(found.index, 1);
+          await persistProjects();
+          render();
+        }
+      }
+    }, htmlToNode(trashSvg()))
+  );
+  card.append(foot);
+  return card;
+}
+
+// ----------------- Popover (date/archive) -----------------
 function handlePopoverOutside(e) {
   const pop = document.querySelector('.popover');
   if (!pop) return;
@@ -748,7 +1476,7 @@ function openDatePopover(anchor, kind, project) {
   const commit = async (newValue) => {
     const normalized = newValue || null;
     if (normalized === (project[field] || null)) return;
-    const found = findProject(project.id);
+    const found = findCard(project.id);
     if (!found) return;
     found.project[field] = normalized;
     found.project.updatedAt = new Date().toISOString();
@@ -805,118 +1533,11 @@ function openDatePopover(anchor, kind, project) {
   document.addEventListener('keydown', handlePopoverKey);
 }
 
-function openNotesPopover(anchor, project) {
-  closePopover();
-
-  const textarea = el('textarea', {
-    spellcheck: 'true',
-    placeholder: t('fNotesPh')
-  });
-  textarea.value = project.notes || '';
-
-  const saveIfChanged = async () => {
-    let changed = false;
-    if (textarea.value !== (project.notes || '')) {
-      const found = findProject(project.id);
-      if (found) {
-        found.project.notes = textarea.value;
-        found.project.updatedAt = new Date().toISOString();
-        changed = true;
-      }
-    }
-    
-    const popNode = document.querySelector('.notes-popover');
-    if (popNode) {
-      const w = popNode.offsetWidth + 'px';
-      const h = popNode.offsetHeight + 'px';
-      if (w !== state.settings.notesWidth || h !== state.settings.notesHeight) {
-        state.settings.notesWidth = w;
-        state.settings.notesHeight = h;
-        changed = true;
-      }
-    }
-    
-    if (changed) {
-      await persistSettings();
-      await persistProjects();
-      render();
-    }
-  };
-
-  const pop = el(
-    'div',
-    { class: 'popover notes-popover' },
-    el(
-      'div',
-      { class: 'pop-head' },
-      el('span', { class: 'pop-title-inline', text: t('popNotes') }),
-      el('button', {
-        class: 'icon-btn',
-        type: 'button',
-        title: t('btnClose'),
-        text: '×',
-        onclick: () => closePopover()
-      })
-    ),
-    textarea
-  );
-  pop._onBeforeClose = saveIfChanged;
-
-  if (state.settings.notesWidth) pop.style.width = state.settings.notesWidth;
-  if (state.settings.notesHeight) pop.style.height = state.settings.notesHeight;
-
-  positionPopover(pop, anchor);
-
-  const head = pop.querySelector('.pop-head');
-  let isDragging = false;
-  let startX, startY, startLeft, startTop;
-
-  head.addEventListener('mousedown', (e) => {
-    if (e.target.tagName === 'BUTTON') return;
-    isDragging = true;
-    startX = e.clientX;
-    startY = e.clientY;
-    const rect = pop.getBoundingClientRect();
-    startLeft = rect.left;
-    startTop = rect.top;
-    e.preventDefault();
-    
-    const onMove = (ev) => {
-      pop.style.left = (startLeft + ev.clientX - startX) + 'px';
-      pop.style.top = (startTop + ev.clientY - startY) + 'px';
-      pop.style.bottom = 'auto';
-      pop.style.right = 'auto';
-    };
-    
-    const onUp = () => {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-    };
-    
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-  });
-
-  setTimeout(() => {
-    textarea.focus();
-    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-  }, 30);
-
-  document.addEventListener('mousedown', handlePopoverOutside, true);
-  document.addEventListener('keydown', handlePopoverKey);
-}
-
-// ----------------- Drag & drop -----------------
-function sectionOfCard(cardEl) {
-  const body = cardEl.closest('.col-body');
-  if (!body) return null;
-  return body.id.replace('col-', '');
-}
-
+// ----------------- Drag & drop: cards -----------------
 function onCardDragStart(e, id, cardEl) {
-  const fromSection = sectionOfCard(cardEl);
-  if (!fromSection) return;
-  dragState = { id, fromSection };
+  const body = cardEl.closest('.col-body');
+  if (!body || !body.dataset.colId) return;
+  dragState = { id, fromCol: body.dataset.colId };
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', id);
   // Delay class add so the drag image is captured pre-opacity
@@ -959,103 +1580,21 @@ function hideDropIndicator() {
   document.getElementById('drop-indicator')?.remove();
 }
 
-async function handleDrop(bodyEl, clientY) {
+async function handleCardDrop(toCol, bodyEl, clientY) {
   if (!dragState) return;
-  const toSection = bodyEl.id.replace('col-', '');
-  const toIndex = computeDropIndex(bodyEl, clientY);
-
-  const list = state.data[dragState.fromSection];
-  const fromIndex = list.findIndex((p) => p.id === dragState.id);
+  const b = board();
+  const fromCol = b.columns.find((c) => c.id === dragState.fromCol);
+  if (!fromCol) return;
+  const fromIndex = fromCol.cards.findIndex((p) => p.id === dragState.id);
   if (fromIndex === -1) return;
 
+  const toIndex = computeDropIndex(bodyEl, clientY);
   // computeDropIndex already excludes the dragged card from its search set,
   // so toIndex is the correct position in the post-splice list.
-  const [proj] = list.splice(fromIndex, 1);
-  state.data[toSection].splice(toIndex, 0, proj);
+  const [proj] = fromCol.cards.splice(fromIndex, 1);
+  toCol.cards.splice(toIndex, 0, proj);
   await persistProjects();
   render();
-}
-
-function wireColumnDnD() {
-  let draggedCol = null;
-
-  document.querySelectorAll('.column').forEach(col => {
-    const head = col.querySelector('.col-head');
-    
-    head.addEventListener('dragstart', (e) => {
-      // Don't drag if we're interacting with a child (like button or editable title focus)
-      if (e.target !== head && e.target.tagName !== 'H2') {
-        e.preventDefault();
-        return;
-      }
-      draggedCol = col.dataset.col;
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setDragImage(col, 20, 20);
-      col.classList.add('dragging-col');
-    });
-
-    head.addEventListener('dragend', () => {
-      draggedCol = null;
-      col.classList.remove('dragging-col');
-      document.querySelectorAll('.column').forEach(c => c.classList.remove('drag-over-col'));
-    });
-
-    col.addEventListener('dragover', (e) => {
-      if (draggedCol && draggedCol !== col.dataset.col) {
-        e.preventDefault();
-        col.classList.add('drag-over-col');
-      }
-    });
-
-    col.addEventListener('dragleave', (e) => {
-      if (!col.contains(e.relatedTarget)) {
-        col.classList.remove('drag-over-col');
-      }
-    });
-
-    col.addEventListener('drop', async (e) => {
-      if (draggedCol && draggedCol !== col.dataset.col) {
-        e.preventDefault();
-        col.classList.remove('drag-over-col');
-        
-        let cols = Array.from(state.settings.colOrder || SECTIONS);
-        const fromIdx = cols.indexOf(draggedCol);
-        const toIdx = cols.indexOf(col.dataset.col);
-        
-        cols.splice(fromIdx, 1);
-        cols.splice(toIdx, 0, draggedCol);
-        
-        state.settings.colOrder = cols;
-        await persistSettings();
-        applyColOrder();
-      }
-    });
-  });
-
-  for (const sec of SECTIONS) {
-    const body = document.getElementById(`col-${sec}`);
-    body.addEventListener('dragover', (e) => {
-      if (!dragState) return;
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      body.classList.add('drag-over');
-      const idx = computeDropIndex(body, e.clientY);
-      showDropIndicator(body, idx);
-    });
-    body.addEventListener('dragleave', (e) => {
-      if (!body.contains(e.relatedTarget)) {
-        body.classList.remove('drag-over');
-        hideDropIndicator();
-      }
-    });
-    body.addEventListener('drop', async (e) => {
-      if (!dragState) return;
-      e.preventDefault();
-      body.classList.remove('drag-over');
-      hideDropIndicator();
-      await handleDrop(body, e.clientY);
-    });
-  }
 }
 
 // ----------------- Project modal -----------------
@@ -1066,6 +1605,17 @@ function buildSelectOptions(selectEl, keys, i18nPath) {
     opt.value = k;
     opt.textContent = t(`${i18nPath}.${k}`);
     selectEl.append(opt);
+  }
+}
+
+function buildSectionOptions() {
+  const sel = $('#f-section');
+  sel.innerHTML = '';
+  for (const col of board().columns) {
+    const opt = document.createElement('option');
+    opt.value = col.id;
+    opt.textContent = columnDisplayName(col);
+    sel.append(opt);
   }
 }
 
@@ -1100,21 +1650,29 @@ let pendingCardColor = null;
 function openModal(id = null) {
   state.editing = id;
   const isEdit = !!id;
+  const def = BOARD_DEFS[state.page === 'archive' ? 'research' : state.page];
   $('#modal-title').textContent = t(isEdit ? 'modalEdit' : 'modalNew');
   $('#modal-delete').classList.toggle('hidden', !isEdit);
 
+  // Per-board field labels & visibility
+  $('#f-name-label').textContent = t(def.nameLabel);
+  $('#f-coauthors-label').textContent = t(def.peopleLabel);
+  $('#row-type').classList.toggle('hidden', !def.hasTypeStage);
+  $('#row-stage').classList.toggle('hidden', !def.hasTypeStage);
+
   buildSelectOptions($('#f-type'), TYPE_KEYS, 'types');
   buildSelectOptions($('#f-stage'), STAGE_KEYS, 'stages');
+  buildSectionOptions();
 
   if (isEdit) {
-    const found = findProject(id);
-    if (!found) return;
+    const found = findCard(id);
+    if (!found || found.kind !== 'board') return;
     const p = found.project;
     $('#f-name').value = p.name || '';
     $('#f-coauthors').value = p.coauthors || '';
     $('#f-type').value = p.type || 'undecided';
     $('#f-stage').value = p.stage || 'planning';
-    $('#f-section').value = found.section;
+    $('#f-section').value = found.colId;
     $('#f-folder').value = p.folder || '';
     $('#f-target').value = p.targetDate || '';
     $('#f-notes').value = p.notes || '';
@@ -1140,14 +1698,15 @@ function openModal(id = null) {
   setTimeout(() => $('#f-name').focus(), 40);
 }
 
-function openModalForSection(section) {
+function openModalForColumn(colId) {
   openModal(null);
-  $('#f-section').value = section;
+  $('#f-section').value = colId;
 }
 
 function closeModal() {
   $('#modal').classList.add('hidden');
   state.editing = null;
+  maybeRunPendingReload();
 }
 
 async function saveFromModal() {
@@ -1159,16 +1718,17 @@ async function saveFromModal() {
   const coauthors = $('#f-coauthors').value.trim();
   const type = $('#f-type').value;
   const stage = $('#f-stage').value;
-  const section = $('#f-section').value;
+  const colId = $('#f-section').value;
   const folder = $('#f-folder').value.trim() || null;
   const color = pendingCardColor || null;
   const targetDate = $('#f-target').value || null;
   const notes = $('#f-notes').value;
   const now = new Date().toISOString();
+  const b = board();
 
   if (state.editing) {
-    const found = findProject(state.editing);
-    if (!found) return;
+    const found = findCard(state.editing);
+    if (!found || found.kind !== 'board') return;
     const p = found.project;
     Object.assign(p, {
       name,
@@ -1181,12 +1741,16 @@ async function saveFromModal() {
       notes,
       updatedAt: now
     });
-    if (found.section !== section) {
-      state.data[found.section].splice(found.index, 1);
-      state.data[section].push(p);
+    if (found.colId !== colId) {
+      const toCol = b.columns.find((c) => c.id === colId);
+      if (toCol) {
+        found.list.splice(found.index, 1);
+        toCol.cards.push(p);
+      }
     }
   } else {
-    state.data[section].push({
+    const toCol = b.columns.find((c) => c.id === colId) || b.columns[0];
+    toCol.cards.push({
       id: uid(),
       name,
       coauthors,
@@ -1220,26 +1784,27 @@ function renderMetaInfo(p) {
 
 async function deleteCurrent() {
   if (!state.editing) return;
-  const found = findProject(state.editing);
+  const found = findCard(state.editing);
   if (!found) return;
-  state.data[found.section].splice(found.index, 1);
+  found.list.splice(found.index, 1);
   await persistProjects();
   render();
   closeModal();
 }
 
+// ----------------- PIN (stored as SHA-256 hash) -----------------
 function openPinModal() {
   $('#pin-input').value = '';
   $('#pin-error').textContent = '';
-  
-  if (!state.settings.pin) {
+
+  if (!state.settings.pinHash) {
     $('#pin-title').textContent = t('pinTitleSet');
     $('#pin-desc').textContent = t('pinDescSet');
   } else {
     $('#pin-title').textContent = t('pinTitleEnter');
     $('#pin-desc').textContent = t('pinDescEnter');
   }
-  
+
   $('#pin-modal').classList.remove('hidden');
   setTimeout(() => $('#pin-input').focus(), 40);
 }
@@ -1248,45 +1813,40 @@ function closePinModal() {
   $('#pin-modal').classList.add('hidden');
 }
 
+async function unlockPendingTarget() {
+  if (state.unlockTarget) {
+    const found = findCard(state.unlockTarget);
+    if (found) {
+      found.project.hidden = false;
+      found.project.updatedAt = new Date().toISOString();
+      await persistProjects();
+    }
+    state.unlockTarget = null;
+  }
+}
+
 async function submitPin() {
   const pin = $('#pin-input').value;
   if (pin.length !== 4) {
     $('#pin-error').textContent = t('pinErrorLength');
     return;
   }
-  
-  if (!state.settings.pin) {
-    state.settings.pin = pin;
+
+  const hash = await sha256Hex(pin);
+  if (!state.settings.pinHash) {
+    state.settings.pinHash = hash;
     await persistSettings();
-    if (state.unlockTarget) {
-      const found = findProject(state.unlockTarget);
-      if (found) {
-        found.project.hidden = false;
-        found.project.updatedAt = new Date().toISOString();
-        await persistProjects();
-      }
-      state.unlockTarget = null;
-    }
+    await unlockPendingTarget();
+    closePinModal();
+    render();
+  } else if (state.settings.pinHash === hash) {
+    await unlockPendingTarget();
     closePinModal();
     render();
   } else {
-    if (state.settings.pin === pin) {
-      if (state.unlockTarget) {
-        const found = findProject(state.unlockTarget);
-        if (found) {
-          found.project.hidden = false;
-          found.project.updatedAt = new Date().toISOString();
-          await persistProjects();
-        }
-        state.unlockTarget = null;
-      }
-      closePinModal();
-      render();
-    } else {
-      $('#pin-error').textContent = t('pinErrorWrong');
-      $('#pin-input').value = '';
-      $('#pin-input').focus();
-    }
+    $('#pin-error').textContent = t('pinErrorWrong');
+    $('#pin-input').value = '';
+    $('#pin-input').focus();
   }
 }
 
@@ -1327,15 +1887,6 @@ function applyLocale() {
   document.querySelectorAll('[data-i18n]').forEach((n) => {
     n.textContent = t(n.getAttribute('data-i18n'));
   });
-  
-  // Custom column titles
-  document.querySelectorAll('.col-title').forEach((n) => {
-    const colId = n.dataset.col;
-    if (state.settings.colNames && state.settings.colNames[colId]) {
-      n.textContent = state.settings.colNames[colId];
-    }
-  });
-
   document.querySelectorAll('[data-i18n-title]').forEach((n) => {
     n.setAttribute('title', t(n.getAttribute('data-i18n-title')));
   });
@@ -1350,30 +1901,21 @@ function renderFooter() {
   const foot = $('#foot-text');
   foot.innerHTML = '';
   const lang = state.settings.language;
+  const link = el('a', {
+    href: '#',
+    text: lang === 'en' ? 'Assoc. Prof. Dr. Mehmet Özcan' : 'Doç. Dr. Mehmet Özcan',
+    onclick: (e) => {
+      e.preventDefault();
+      window.api.openExternal('https://www.ozcanmehmet.com');
+    }
+  });
   if (lang === 'en') {
-    // "Developed by Assoc. Prof. Dr. Mehmet Özcan. All rights reserved."
-    const link = el('a', {
-      href: '#',
-      text: 'Assoc. Prof. Dr. Mehmet Özcan',
-      onclick: (e) => {
-        e.preventDefault();
-        window.api.openExternal('https://www.ozcanmehmet.com');
-      }
-    });
     foot.append(
       document.createTextNode('Developed by '),
       link,
       document.createTextNode('. All rights reserved.')
     );
   } else {
-    const link = el('a', {
-      href: '#',
-      text: 'Doç. Dr. Mehmet Özcan',
-      onclick: (e) => {
-        e.preventDefault();
-        window.api.openExternal('https://www.ozcanmehmet.com');
-      }
-    });
     foot.append(
       link,
       document.createTextNode(' tarafından geliştirilmiştir. Tüm hakları saklıdır.')
@@ -1397,11 +1939,11 @@ async function refreshSyncStatus() {
 }
 
 function showToast(msg) {
-  const el = $('#toast');
-  el.textContent = msg;
-  el.classList.add('show');
+  const node = $('#toast');
+  node.textContent = msg;
+  node.classList.add('show');
   clearTimeout(showToast._timer);
-  showToast._timer = setTimeout(() => el.classList.remove('show'), 2400);
+  showToast._timer = setTimeout(() => node.classList.remove('show'), 2400);
 }
 
 async function reloadFromDisk() {
@@ -1411,7 +1953,9 @@ async function reloadFromDisk() {
     { fontScale: 1, bgPreset: 'charcoal', language: 'tr' },
     loaded
   );
-  migrateProjects();
+  const migrated = ensureV3();
+  if (migrated) await persistProjects();
+  await migratePinIfNeeded();
   applyFont();
   applyBg();
   applyLocale();
@@ -1419,6 +1963,27 @@ async function reloadFromDisk() {
   $('#s-lang').value = state.settings.language;
   buildBgChips();
   render();
+}
+
+async function migratePinIfNeeded() {
+  if (state.settings.pin && !state.settings.pinHash) {
+    state.settings.pinHash = await sha256Hex(String(state.settings.pin));
+    delete state.settings.pin;
+    await persistSettings();
+  }
+}
+
+function maybeRunPendingReload() {
+  if (!state.pendingExternalReload) return;
+  const anyModalOpen =
+    !$('#modal').classList.contains('hidden') ||
+    !$('#whiteboard-modal').classList.contains('hidden');
+  if (anyModalOpen) return;
+  state.pendingExternalReload = false;
+  reloadFromDisk().then(() => {
+    refreshSyncStatus();
+    showToast(t('toastExternalChange'));
+  });
 }
 
 function openSettings() {
@@ -1471,6 +2036,18 @@ function updateFilterBarState() {
     .classList.toggle('filtering', isFilterActive());
 }
 
+function switchPage(page) {
+  if (state.page === page) return;
+  state.page = page;
+  // Reset filters between pages to avoid invisible filtering surprises
+  state.filters = { q: '', type: 'all', stage: 'all' };
+  $('#filter-q').value = '';
+  $('#filter-type').value = 'all';
+  $('#filter-stage').value = 'all';
+  updateFilterBarState();
+  render();
+}
+
 function wireEvents() {
   // Title bar
   const btnMin = $('#btn-minimize');
@@ -1480,8 +2057,19 @@ function wireEvents() {
   const btnClose = $('#btn-close');
   if (btnClose) btnClose.addEventListener('click', () => window.api.windowClose());
 
-  document.querySelectorAll('.add-btn').forEach((btn) => {
-    btn.addEventListener('click', () => openModalForSection(btn.dataset.add));
+  if (window.api.onMaximizedChange) {
+    window.api.onMaximizedChange((isMax) => {
+      const svg = $('#btn-maximize-svg');
+      if (!svg) return;
+      svg.innerHTML = isMax
+        ? '<path d="M 3 4 L 3 9 L 8 9 L 8 4 Z M 4.5 4 L 4.5 2 L 9 2 L 9 6.5 L 8 6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>'
+        : '<path d="M 2 2 L 8 2 L 8 8 L 2 8 Z" fill="none" stroke="currentColor" stroke-width="1.5"/>';
+    });
+  }
+
+  // Page navigation
+  document.querySelectorAll('.nav-btn').forEach((btn) => {
+    btn.addEventListener('click', () => switchPage(btn.dataset.page));
   });
 
   $('#filter-q').addEventListener('input', (e) => {
@@ -1510,31 +2098,6 @@ function wireEvents() {
 
   $('#f-target-clear').addEventListener('click', () => {
     $('#f-target').value = '';
-  });
-
-  document.querySelectorAll('.col-title').forEach(el => {
-    el.addEventListener('focus', () => {
-      el.closest('.col-head').draggable = false;
-    });
-    el.addEventListener('blur', async () => {
-      el.closest('.col-head').draggable = true;
-      const colId = el.dataset.col;
-      if (!state.settings.colNames) state.settings.colNames = {};
-      const newName = el.textContent.trim();
-      if (newName) {
-        state.settings.colNames[colId] = newName;
-      } else {
-        el.textContent = t(colId === 'ongoing' ? 'colOngoing' : colId === 'future' ? 'colFuture' : 'colCompleted');
-        delete state.settings.colNames[colId];
-      }
-      await persistSettings();
-    });
-    el.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        el.blur();
-      }
-    });
   });
 
   $('#modal-close').addEventListener('click', closeModal);
@@ -1624,50 +2187,51 @@ function wireEvents() {
     const isLight = document.querySelector('.whiteboard-container').classList.contains('force-light');
     const textColor = isLight ? '#111111' : '#e6e8ec';
 
-    const migrateList = (list) => {
-      list.forEach(p => {
-        if (!p.notesMigrated && p.notes && p.notes.trim().length > 0) {
-          p.whiteboardData = {
-            canvas: {
-              version: "5.3.0",
-              objects: [{
-                type: "i-text",
-                version: "5.3.0",
-                originX: "left",
-                originY: "top",
-                left: 50,
-                top: 50,
-                fill: textColor,
-                text: p.notes,
-                fontSize: 20,
-                fontFamily: "sans-serif"
-              }]
-            },
-            mathList: []
-          };
-          p.notesMigrated = true;
-          count++;
-        }
-      });
-    };
-
-    migrateList(state.data.ongoing);
-    migrateList(state.data.future);
-    migrateList(state.data.completed);
+    forAllCards((p) => {
+      if (!p.notesMigrated && p.notes && p.notes.trim().length > 0 && !p.whiteboardData) {
+        p.whiteboardData = {
+          canvas: {
+            version: '5.3.0',
+            objects: [{
+              type: 'textbox',
+              version: '5.3.0',
+              originX: 'left',
+              originY: 'top',
+              left: 50,
+              top: 50,
+              width: 400,
+              fill: textColor,
+              text: p.notes,
+              fontSize: 20,
+              fontFamily: 'sans-serif'
+            }]
+          },
+          mathList: []
+        };
+        p.notesMigrated = true;
+        count++;
+      }
+    });
 
     if (count > 0) {
       persistProjects();
-      showToast(`${count} projedeki eski notlar tahtaya aktarıldı.`);
+      showToast(t('migratedToast').replace('{n}', String(count)));
     } else {
-      showToast('Aktarılacak eski not bulunamadı.');
+      showToast(t('migratedNone'));
     }
   });
 
-  // External change (another device wrote to the data folder)
+  // External change (another device wrote to the data folder).
+  // Defer the reload while an edit surface (modal or whiteboard) is open so
+  // in-progress edits are never clobbered; apply it when they close.
   window.api.onExternalChange(async () => {
-    // Skip reload while a modal is open to avoid disrupting editing
-    const projectModalOpen = !$('#modal').classList.contains('hidden');
-    if (projectModalOpen) return;
+    const busy =
+      !$('#modal').classList.contains('hidden') ||
+      !$('#whiteboard-modal').classList.contains('hidden');
+    if (busy) {
+      state.pendingExternalReload = true;
+      return;
+    }
     await reloadFromDisk();
     await refreshSyncStatus();
     showToast(t('toastExternalChange'));
@@ -1685,67 +2249,67 @@ function wireEvents() {
   });
 }
 
-// ----------------- Migration -----------------
-function migrateProjects() {
-  for (const sec of SECTIONS) {
-    if (!Array.isArray(state.data[sec])) state.data[sec] = [];
-    for (const p of state.data[sec]) {
-      if (p.stage && STAGE_LEGACY[p.stage]) p.stage = STAGE_LEGACY[p.stage];
-      if (p.stage === 'drafting') p.stage = 'literature';
-      if (!STAGE_KEYS.includes(p.stage)) p.stage = 'planning';
-      if (!p.type) p.type = 'undecided';
-      if (!TYPE_KEYS.includes(p.type)) p.type = 'undecided';
-      if (p.notes === undefined) p.notes = '';
-      if (p.targetDate === undefined) p.targetDate = null;
-      if (p.updatedAt === undefined) p.updatedAt = p.createdAt || new Date().toISOString();
-      if (p.startDate === undefined) {
-        p.startDate = p.createdAt
-          ? p.createdAt.slice(0, 10)
-          : new Date().toISOString().slice(0, 10);
-      }
-    }
-  }
-}
-
 // ----------------- Init -----------------
 async function init() {
+  if (window.MathfieldElement) {
+    try {
+      MathfieldElement.fontsDirectory = './vendor/mathlive/fonts';
+      MathfieldElement.soundsDirectory = null;
+    } catch (_) {}
+  }
   state.data = await window.api.loadProjects();
   state.settings = Object.assign(
     { fontScale: 1, bgPreset: 'charcoal', language: 'tr' },
     await window.api.loadSettings()
   );
-  migrateProjects();
+  const migrated = ensureV3();
+  if (migrated) await persistProjects();
+  await migratePinIfNeeded();
   applyFont();
   applyBg();
   applyLocale();
   buildFilterSelects();
   updateFilterBarState();
   wireEvents();
-  wireColumnDnD();
   render();
 }
 
 init();
 
-// ----------------- Whiteboard Logic (V2) -----------------
+// ----------------- Whiteboard Logic (V3) -----------------
 let wbCanvas = null;
 let wbCurrentProjId = null;
+let wbSaveTimer = null;
+
+// All whiteboard mutations funnel through this debounce so rapid events
+// (zoom wheel, dragging, typing) produce a single disk write.
+function scheduleWbSave() {
+  if (!wbCurrentProjId) return;
+  clearTimeout(wbSaveTimer);
+  wbSaveTimer = setTimeout(() => saveWhiteboardData(), 800);
+}
+
+function flushWbSave() {
+  clearTimeout(wbSaveTimer);
+  wbSaveTimer = null;
+  saveWhiteboardData();
+}
 
 function initWhiteboard() {
   if (wbCanvas) return;
   const canvasEl = document.getElementById('wb-canvas');
   const bodyEl = document.getElementById('wb-body');
-  
+
   canvasEl.width = bodyEl.clientWidth;
   canvasEl.height = bodyEl.clientHeight;
-  
+
   wbCanvas = new fabric.Canvas('wb-canvas', {
     isDrawingMode: false,
     selection: true,
     fireRightClick: true,
     stopContextMenu: true
   });
-  
+
   let mathContainer = document.getElementById('wb-math-container');
   if (!mathContainer) {
     mathContainer = document.createElement('div');
@@ -1767,7 +2331,7 @@ function initWhiteboard() {
       mathContainer.style.transform = `matrix(${vpt[0]}, ${vpt[1]}, ${vpt[2]}, ${vpt[3]}, ${vpt[4]}, ${vpt[5]})`;
     }
   });
-  
+
   // Prevent Textbox from scaling visually; instead adjust its width so text reflows
   wbCanvas.on('object:scaling', function(e) {
     if (e.target && e.target.type === 'textbox') {
@@ -1780,7 +2344,7 @@ function initWhiteboard() {
       });
     }
   });
-  
+
   window.addEventListener('resize', () => {
     if (!wbCanvas) return;
     wbCanvas.setWidth(bodyEl.clientWidth);
@@ -1820,11 +2384,11 @@ function initWhiteboard() {
     // Calculate new position
     let newLeft = wbStartLeft + e.clientX - wbStartX;
     let newTop = wbStartTop + e.clientY - wbStartY;
-    
+
     // Bounds check so it doesn't get lost
     if (newTop < 0) newTop = 0;
     if (newLeft < -wbContainer.offsetWidth + 50) newLeft = -wbContainer.offsetWidth + 50; // Don't drag too far left
-    
+
     wbContainer.style.left = newLeft + 'px';
     wbContainer.style.top = newTop + 'px';
   });
@@ -1843,19 +2407,19 @@ function initWhiteboard() {
     wbCanvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
     opt.e.preventDefault();
     opt.e.stopPropagation();
-    saveWhiteboardData();
+    scheduleWbSave();
   });
-  
+
   // Disable context menu on canvas to allow right-click panning
   document.getElementById('wb-body').addEventListener('contextmenu', e => e.preventDefault());
 
   wbCanvas.on('mouse:down', function(opt) {
     var evt = opt.e;
-    
+
     // Pan condition: Alt key OR Panning tool OR Right Click OR (Left click on empty space and not drawing)
     const isRightClick = evt.button === 2;
     const isLeftClickEmpty = evt.button === 0 && !opt.target && !wbCanvas.isDrawingMode;
-    
+
     if (evt.altKey === true || document.getElementById('wb-tool-select').classList.contains('panning') || isRightClick || isLeftClickEmpty) {
       this.isDragging = true;
       this.selection = false;
@@ -1864,7 +2428,7 @@ function initWhiteboard() {
       if (isRightClick) evt.preventDefault();
     }
   });
-  
+
   wbCanvas.on('mouse:move', function(opt) {
     if (this.isDragging) {
       var e = opt.e;
@@ -1876,30 +2440,32 @@ function initWhiteboard() {
       this.lastPosY = e.clientY;
     }
   });
-  
+
   wbCanvas.on('mouse:up', function(opt) {
+    const wasPanning = this.isDragging;
     this.setViewportTransform(this.viewportTransform);
     this.isDragging = false;
     this.selection = true;
-    saveWhiteboardData();
+    if (wasPanning) scheduleWbSave();
   });
-  
-  wbCanvas.on('object:modified', saveWhiteboardData);
-  wbCanvas.on('object:added', saveWhiteboardData);
-  wbCanvas.on('path:created', saveWhiteboardData);
-  
+
+  wbCanvas.on('object:modified', scheduleWbSave);
+  wbCanvas.on('object:added', scheduleWbSave);
+  wbCanvas.on('object:removed', scheduleWbSave);
+  wbCanvas.on('path:created', scheduleWbSave);
+
   // Toolbar buttons
   document.getElementById('wb-close').addEventListener('click', closeWhiteboard);
-  
+
   const btnSelect = document.getElementById('wb-tool-select');
   const btnDraw = document.getElementById('wb-tool-draw');
-  
+
   btnSelect.addEventListener('click', () => {
     wbCanvas.isDrawingMode = false;
     btnSelect.classList.add('active');
     btnDraw.classList.remove('active');
   });
-  
+
   btnDraw.addEventListener('click', () => {
     wbCanvas.isDrawingMode = true;
     const isLight = document.querySelector('.whiteboard-container').classList.contains('force-light');
@@ -1908,7 +2474,7 @@ function initWhiteboard() {
     btnDraw.classList.add('active');
     btnSelect.classList.remove('active');
   });
-  
+
   document.getElementById('wb-add-math').addEventListener('click', addMathEquation);
   document.getElementById('wb-export-pdf').addEventListener('click', exportWhiteboardPDF);
 
@@ -1944,7 +2510,7 @@ function initWhiteboard() {
     });
     wbCanvas.freeDrawingBrush.color = toColor;
     wbCanvas.renderAll();
-    saveWhiteboardData();
+    scheduleWbSave();
   });
 
   // Maximize toggle
@@ -1952,9 +2518,9 @@ function initWhiteboard() {
     const container = document.querySelector('.whiteboard-container');
     container.classList.toggle('fullscreen');
     setTimeout(() => {
-      const bodyEl = document.getElementById('wb-body');
-      wbCanvas.setWidth(bodyEl.clientWidth);
-      wbCanvas.setHeight(bodyEl.clientHeight);
+      const bodyEl2 = document.getElementById('wb-body');
+      wbCanvas.setWidth(bodyEl2.clientWidth);
+      wbCanvas.setHeight(bodyEl2.clientHeight);
       wbCanvas.renderAll();
     }, 300); // Wait for transition
   });
@@ -1978,7 +2544,7 @@ function initWhiteboard() {
           img.scaleToWidth(200);
           wbCanvas.add(img);
           wbCanvas.setActiveObject(img);
-          saveWhiteboardData();
+          scheduleWbSave();
         });
       };
       reader.readAsDataURL(file);
@@ -2016,7 +2582,7 @@ function initWhiteboard() {
       obj.set('fontWeight', obj.fontWeight === 'bold' ? 'normal' : 'bold');
       wbCanvas.renderAll();
       updateTextTools();
-      saveWhiteboardData();
+      scheduleWbSave();
     }
   });
 
@@ -2026,7 +2592,7 @@ function initWhiteboard() {
       obj.set('fontStyle', obj.fontStyle === 'italic' ? 'normal' : 'italic');
       wbCanvas.renderAll();
       updateTextTools();
-      saveWhiteboardData();
+      scheduleWbSave();
     }
   });
 
@@ -2035,7 +2601,7 @@ function initWhiteboard() {
     if (isTextObj(obj)) {
       obj.set('fontSize', parseInt(e.target.value, 10));
       wbCanvas.renderAll();
-      saveWhiteboardData();
+      scheduleWbSave();
     }
   });
 
@@ -2101,41 +2667,55 @@ function initWhiteboard() {
       if (wbCanvas.getActiveObject() && wbCanvas.getActiveObject().isEditing) return;
       const tag = document.activeElement.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'MATH-FIELD') return;
-      
+
       const activeObjects = wbCanvas.getActiveObjects();
       if (activeObjects.length) {
         activeObjects.forEach(obj => wbCanvas.remove(obj));
         wbCanvas.discardActiveObject();
-        saveWhiteboardData();
+        scheduleWbSave();
       }
     }
   });
+
+  // Never lose the last edits on app close
+  window.addEventListener('beforeunload', () => {
+    if (wbCurrentProjId && wbSaveTimer) flushWbSave();
+  });
+}
+
+// Old boards were saved with editable "i-text" objects; we now use "textbox"
+// everywhere. Convert on the parsed structure (never with string replace,
+// which could corrupt user text containing the same literal).
+function convertITextToTextbox(node) {
+  if (!node || typeof node !== 'object') return;
+  if (node.type === 'i-text') node.type = 'textbox';
+  if (Array.isArray(node.objects)) node.objects.forEach(convertITextToTextbox);
 }
 
 function openWhiteboard(id) {
-  const found = findProject(id);
+  const found = findCard(id);
   if (!found) return;
   const p = found.project;
   wbCurrentProjId = id;
-  
+
   document.getElementById('whiteboard-modal').classList.remove('hidden');
   document.getElementById('wb-title').textContent = (p.name || 'Proj') + ' - ' + t('wbTitle');
-  
+
   const hex = p.color ? CARD_COLORS.find(c => c.key === p.color)?.hex : 'transparent';
   document.getElementById('wb-color').style.backgroundColor = hex;
-  
+
   initWhiteboard();
-  
+
   // Ensure canvas is resized to the visible container
   const bodyEl = document.getElementById('wb-body');
   wbCanvas.setWidth(bodyEl.clientWidth);
   wbCanvas.setHeight(bodyEl.clientHeight);
-  
+
   document.getElementById('wb-tool-select').click(); // Default select tool
-  
+
   // Clear any existing math wrappers
   document.querySelectorAll('.math-wrapper').forEach(e => e.remove());
-  
+
   const runMigration = () => {
     if (!p.notesMigrated && p.notes && p.notes.trim().length > 0) {
       const isLight = document.querySelector('.whiteboard-container').classList.contains('force-light');
@@ -2152,7 +2732,7 @@ function openWhiteboard(id) {
       oldNotesText.setControlsVisibility({ mt: false, mb: false });
       wbCanvas.add(oldNotesText);
       p.notesMigrated = true;
-      saveWhiteboardData();
+      scheduleWbSave();
     }
   };
 
@@ -2164,8 +2744,8 @@ function openWhiteboard(id) {
   if (p.whiteboardData) {
     let canvasData = p.whiteboardData.canvas;
     if (canvasData) {
-      const dataStr = typeof canvasData === 'string' ? canvasData : JSON.stringify(canvasData);
-      canvasData = JSON.parse(dataStr.replace(/"type":"i-text"/g, '"type":"textbox"'));
+      canvasData = typeof canvasData === 'string' ? JSON.parse(canvasData) : JSON.parse(JSON.stringify(canvasData));
+      convertITextToTextbox(canvasData);
     }
 
     wbCanvas.loadFromJSON(canvasData, function() {
@@ -2192,16 +2772,18 @@ function openWhiteboard(id) {
 }
 
 function closeWhiteboard() {
-  saveWhiteboardData();
+  flushWbSave();
   document.getElementById('whiteboard-modal').classList.add('hidden');
   wbCurrentProjId = null;
+  render();
+  maybeRunPendingReload();
 }
 
 function saveWhiteboardData() {
   if (!wbCurrentProjId) return;
-  const found = findProject(wbCurrentProjId);
+  const found = findCard(wbCurrentProjId);
   if (!found) return;
-  
+
   const mathElements = document.querySelectorAll('.math-wrapper');
   const mathList = Array.from(mathElements).map(el => {
     const mf = el.querySelector('math-field');
@@ -2211,14 +2793,14 @@ function saveWhiteboardData() {
       value: mf.getValue('latex')
     };
   });
-  
+
   found.project.whiteboardData = {
     canvas: wbCanvas.toJSON(),
     mathList: mathList,
     viewportTransform: wbCanvas.viewportTransform.slice(),
     zoom: wbCanvas.getZoom()
   };
-  
+
   found.project.updatedAt = new Date().toISOString();
   persistProjects();
 }
@@ -2229,69 +2811,78 @@ function addMathEquation(e, x = '100px', y = '100px', value = '') {
   setTimeout(() => wrapper.classList.remove('highlight'), 2000);
   wrapper.style.left = x;
   wrapper.style.top = y;
-  
+
   const mf = document.createElement('math-field');
   const initialValue = value || 'f(x) = x^2';
   mf.setValue(initialValue, {suppressChangeNotifications: true});
   // Virtual Keyboard explicitly disabled as requested
   mf.mathVirtualKeyboardPolicy = "none";
-  mf.addEventListener('input', () => saveWhiteboardData());
-  
+  mf.addEventListener('input', () => scheduleWbSave());
+
   const closeBtn = document.createElement('div');
   closeBtn.className = 'math-close';
   closeBtn.textContent = '×';
   closeBtn.addEventListener('click', () => {
     wrapper.remove();
-    saveWhiteboardData();
+    scheduleWbSave();
   });
-  
+
   wrapper.appendChild(mf);
   wrapper.appendChild(closeBtn);
   wrapper.style.pointerEvents = 'auto';
-  
+
   let mathContainer = document.getElementById('wb-math-container');
   if (mathContainer) {
     mathContainer.appendChild(wrapper);
   } else {
     document.getElementById('wb-body').appendChild(wrapper);
   }
-  
-  // Draggable logic for math wrapper
-  let isDragging = false;
-  let startX, startY, startLeft, startTop;
+
+  // Draggable logic for math wrapper. Document-level listeners are attached
+  // only for the duration of a drag (and removed on mouseup) so repeated
+  // whiteboard openings don't accumulate global listeners.
   wrapper.addEventListener('mousedown', (ev) => {
     if (ev.target.tagName === 'MATH-FIELD' || ev.target.className === 'math-close') return;
-    isDragging = true;
-    startX = ev.clientX;
-    startY = ev.clientY;
-    startLeft = parseInt(wrapper.style.left || 0, 10);
-    startTop = parseInt(wrapper.style.top || 0, 10);
+    const startX = ev.clientX;
+    const startY = ev.clientY;
+    const startLeft = parseInt(wrapper.style.left || 0, 10);
+    const startTop = parseInt(wrapper.style.top || 0, 10);
+    // The math container is scaled by the canvas viewport transform, so
+    // convert screen-pixel deltas into board coordinates.
+    const scale = wbCanvas ? (wbCanvas.viewportTransform[0] || 1) : 1;
     ev.preventDefault();
-  });
-  
-  document.addEventListener('mousemove', (ev) => {
-    if (!isDragging) return;
-    wrapper.style.left = (startLeft + ev.clientX - startX) + 'px';
-    wrapper.style.top = (startTop + ev.clientY - startY) + 'px';
-  });
-  
-  document.addEventListener('mouseup', () => {
-    if (isDragging) {
-      isDragging = false;
-      saveWhiteboardData();
-    }
+
+    const onMove = (mv) => {
+      wrapper.style.left = (startLeft + (mv.clientX - startX) / scale) + 'px';
+      wrapper.style.top = (startTop + (mv.clientY - startY) / scale) + 'px';
+    };
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      scheduleWbSave();
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
   });
 }
 
+function sanitizeFilename(name) {
+  return (name || 'whiteboard')
+    .replace(/[\\/:*?"<>|]/g, '_')
+    .trim()
+    .slice(0, 80) || 'whiteboard';
+}
+
 function exportWhiteboardPDF() {
+  const found = wbCurrentProjId ? findCard(wbCurrentProjId) : null;
+  const base = found ? sanitizeFilename(found.project.name) : 'whiteboard';
   const element = document.getElementById('wb-body');
   const opt = {
     margin:       0,
-    filename:     'whiteboard.pdf',
+    filename:     base + '-tahta.pdf',
     image:        { type: 'jpeg', quality: 0.98 },
     html2canvas:  { scale: 2 },
     jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
   };
   html2pdf().set(opt).from(element).save();
 }
-

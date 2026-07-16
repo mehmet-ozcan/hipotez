@@ -2,9 +2,9 @@
 
 **🇹🇷 [Türkçe](#türkçe) · 🇬🇧 [English](#english)**
 
-Akademisyenler için, üzerinde çalışılan ve ileriye dönük akademik projeleri takip etmeyi sağlayan masaüstü uygulama. Üç sütunlu Kanban görünümü, aşama takibi, bulut senkronizasyonu ve karanlık tema.
+Akademisyenler için masaüstü çalışma planlayıcı: Araştırma, Dersler, Danışmanlık ve Hakemlik panoları; arşiv odası, aşama takibi, beyaz tahta, bulut senkronizasyonu ve karanlık tema.
 
-> An academic project planner: three-column Kanban view, stage tracking, cloud sync, dark UI. Built with Electron.
+> An academic workload planner: Research, Courses, Advising and Refereeing boards with an archive room, stage tracking, whiteboards, cloud sync, dark UI. Built with Electron.
 
 ---
 
@@ -12,7 +12,8 @@ Akademisyenler için, üzerinde çalışılan ve ileriye dönük akademik projel
 
 ### Özellikler
 
-- **Üç bölümlü görünüm**: Üzerinde Çalışılan · Gelecek Projeler · Bitmiş Projeler
+- **Dört pano**: Araştırma (Üzerinde Çalışılan · Gelecek · Bitmiş) · Dersler · Danışmanlık · Hakemlik — sütunlar yeniden adlandırılabilir, Dersler/Danışmanlık/Hakemlik panolarında 1–4 sütun serbestçe eklenip silinebilir
+- **Arşiv Odası**: Araştırma kartları Terk Edilenler/Yayınlananlar, hakemlik kartları Kabul/Red kategorilerine arşivlenir; geri yükleme ve kalıcı silme
 - **Proje kartları**: proje adı, ortak yazarlar, proje tipi, aşama, yerel klasör bağlantısı, kart rengi
 - **Aşamalar**: Planlama → Taslak Oluşturma → Ampirik Analiz → Tartışma-Sonuç → Gönderi Öncesi Cilalama → Gönderildi → Hakem Düzeltmesi
 - **Proje tipleri**: Makale, Sempozyum-Bildiri, Kitap Bölümü, Kitap, Araştırma Projesi, Belirsiz
@@ -80,7 +81,8 @@ Uygulama, [Doç. Dr. Mehmet Özcan](https://www.ozcanmehmet.com) tarafından gel
 
 ### Features
 
-- **Three-column board**: In Progress · Future Projects · Completed Projects
+- **Four boards**: Research (In Progress · Future · Completed) · Courses · Advising · Refereeing — renamable columns; Courses/Advising/Refereeing support 1–4 user-managed columns
+- **Archive room**: research cards archive into Abandoned/Published, refereeing cards into Accepted/Declined; restore or delete permanently
 - **Project cards**: name, co-authors, project type, stage, local folder link, card color
 - **Stages**: Planning → Drafting → Empirical Analysis → Discussion-Conclusion → Pre-submission Polishing → Submitted → Referee Revision
 - **Project types**: Article, Conference Paper, Book Chapter, Book, Research Project, Undecided

@@ -28,5 +28,10 @@ contextBridge.exposeInMainWorld('api', {
   // Window Controls
   windowMinimize: () => ipcRenderer.invoke('window:minimize'),
   windowMaximize: () => ipcRenderer.invoke('window:maximize'),
-  windowClose: () => ipcRenderer.invoke('window:close')
+  windowClose: () => ipcRenderer.invoke('window:close'),
+  onMaximizedChange: (cb) => {
+    const h = (_e, isMax) => cb(isMax);
+    ipcRenderer.on('window:maximized', h);
+    return () => ipcRenderer.removeListener('window:maximized', h);
+  }
 });

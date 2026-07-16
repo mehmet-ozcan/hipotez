@@ -1,6 +1,6 @@
 {
   "name": "hipotez",
-  "version": "2.2.0",
+  "version": "3.0.0",
   "description": "Academic project planner — Hipotez",
   "main": "main.js",
   "author": {
@@ -30,7 +30,12 @@
   },
   "devDependencies": {
     "electron": "^33.0.0",
-    "electron-builder": "^25.0.0"
+    "electron-builder": "^25.0.0",
+    "fabric": "^5.5.2",
+    "html2pdf.js": "^0.10.1",
+    "mathlive": "^0.101.0",
+    "png-to-ico": "^3.0.2",
+    "sharp": "^0.35.3"
   },
   "build": {
     "appId": "com.hipotez.planner",
@@ -41,14 +46,17 @@
       "index.html",
       "renderer.js",
       "styles.css",
-      "assets/**"
+      "assets/**",
+      "vendor/**"
     ],
     "win": {
       "icon": "assets/app-icon.ico",
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ]
     },

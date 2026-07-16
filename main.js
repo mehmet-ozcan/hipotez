@@ -8,6 +8,26 @@ let watcher = null;
 let watchDebounce = null;
 let lastSelfWrite = 0;
 
+// Dev helper: isolate userData so tests never touch real data
+// (Electron resolves appData via the Windows shell API, not %APPDATA%).
+if (process.env.HIPOTEZ_USER_DATA) {
+  app.setPath('userData', process.env.HIPOTEZ_USER_DATA);
+}
+
+// ---------- Single instance ----------
+
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+    }
+  });
+}
+
 // ---------- Paths ----------
 
 function localDir() {
@@ -19,7 +39,7 @@ function syncConfigPath() {
 }
 
 function getSyncConfig() {
-  return readJson(syncConfigPath(), { dataFolder: null });
+  return readJson(syncConfigPath(), { dataFolder: null, driveMap: {} });
 }
 
 function setSyncConfig(cfg) {
@@ -42,6 +62,25 @@ function settingsPath() {
 
 // ---------- JSON helpers ----------
 
+function notifyCorrupt(file, backupPath) {
+  const opts = {
+    type: 'warning',
+    title: 'Veri dosyası okunamadı',
+    message: `${path.basename(file)} dosyası bozuk görünüyor.`,
+    detail:
+      `Dosyanın bir kopyası şuraya kaydedildi:\n${backupPath}\n\n` +
+      'Uygulama boş/varsayılan veriyle devam edecek. Eğer verileriniz kayıpsa, ' +
+      'Ayarlar > Yedekleme bölümünden bir yedeği içe aktarabilir veya veri klasöründeki ' +
+      '"backups" klasöründen otomatik yedeklere ulaşabilirsiniz.',
+    buttons: ['Tamam']
+  };
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    dialog.showMessageBox(mainWindow, opts);
+  } else {
+    app.whenReady().then(() => dialog.showMessageBox(opts));
+  }
+}
+
 function readJson(file, fallback) {
   if (!fs.existsSync(file)) return fallback;
   try {
@@ -49,26 +88,86 @@ function readJson(file, fallback) {
     if (!raw.trim()) return fallback;
     return JSON.parse(raw);
   } catch {
+    // Never let a truncated/corrupt file be silently replaced by defaults:
+    // keep a copy aside so the user can recover it.
+    try {
+      const backupPath = file + '.corrupt-' + Date.now();
+      fs.copyFileSync(file, backupPath);
+      notifyCorrupt(file, backupPath);
+    } catch {}
     return fallback;
   }
 }
 
+// Atomic write: write to a temp file first, then rename over the target so a
+// crash or a cloud-sync read mid-write can never observe a half-written file.
 function writeJson(file, data) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf-8');
+  const tmp = file + '.tmp-' + process.pid;
+  fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf-8');
+  fs.renameSync(tmp, file);
   lastSelfWrite = Date.now();
 }
 
 const DEFAULT_PROJECTS = { ongoing: [], future: [], completed: [] };
 const DEFAULT_SETTINGS = { fontScale: 1, bgPreset: 'charcoal', language: 'tr' };
 
-function isEmptyProjects(p) {
-  if (!p) return true;
-  return (
-    (!p.ongoing || p.ongoing.length === 0) &&
-    (!p.future || p.future.length === 0) &&
-    (!p.completed || p.completed.length === 0)
-  );
+// ---------- Card iteration (works on both v2 and v3 data shapes) ----------
+
+function forEachCard(data, fn) {
+  if (!data) return;
+  // v2 shape
+  for (const sec of ['ongoing', 'future', 'completed']) {
+    if (Array.isArray(data[sec])) data[sec].forEach(fn);
+  }
+  // v3 shape
+  if (data.boards) {
+    for (const board of Object.values(data.boards)) {
+      if (!board || !Array.isArray(board.columns)) continue;
+      for (const col of board.columns) {
+        if (Array.isArray(col.cards)) col.cards.forEach(fn);
+      }
+    }
+  }
+  if (data.archives) {
+    for (const arch of Object.values(data.archives)) {
+      if (!arch) continue;
+      for (const cat of Object.values(arch)) {
+        if (cat && Array.isArray(cat.cards)) cat.cards.forEach(fn);
+      }
+    }
+  }
+}
+
+function hasAnyCards(data) {
+  let found = false;
+  forEachCard(data, () => { found = true; });
+  return found;
+}
+
+// ---------- Rotating backups ----------
+
+function backupProjects(reason) {
+  try {
+    const src = projectsPath();
+    if (!fs.existsSync(src)) return;
+    const dir = path.join(dataDir(), 'backups');
+    fs.mkdirSync(dir, { recursive: true });
+    const stamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19);
+    const dest = path.join(dir, `projects-${stamp}${reason ? '-' + reason : ''}.json`);
+    fs.copyFileSync(src, dest);
+    // Keep only the newest 10 backups
+    const files = fs
+      .readdirSync(dir)
+      .filter((f) => f.startsWith('projects-') && f.endsWith('.json'))
+      .map((f) => ({ f, m: fs.statSync(path.join(dir, f)).mtimeMs }))
+      .sort((a, b) => b.m - a.m);
+    for (const old of files.slice(10)) {
+      try { fs.unlinkSync(path.join(dir, old.f)); } catch {}
+    }
+  } catch (e) {
+    console.warn('backup failed:', e.message);
+  }
 }
 
 // ---------- File watcher ----------
@@ -122,6 +221,23 @@ function createWindow() {
 
   mainWindow.setMenuBarVisibility(false);
   mainWindow.loadFile('index.html');
+
+  mainWindow.on('maximize', () => {
+    if (!mainWindow.isDestroyed()) mainWindow.webContents.send('window:maximized', true);
+  });
+  mainWindow.on('unmaximize', () => {
+    if (!mainWindow.isDestroyed()) mainWindow.webContents.send('window:maximized', false);
+  });
+
+  // Surface renderer errors on stdout while developing (npm start)
+  if (!app.isPackaged) {
+    mainWindow.webContents.on('console-message', (_e, level, message, line, sourceId) => {
+      if (level >= 2) {
+        console.log(`[renderer:${level === 3 ? 'error' : 'warn'}] ${message} (${sourceId}:${line})`);
+      }
+    });
+  }
+
   mainWindow.on('closed', () => {
     stopWatcher();
     mainWindow = null;
@@ -133,8 +249,49 @@ if (process.platform === 'win32') {
 }
 
 app.whenReady().then(() => {
+  backupProjects('start');
   createWindow();
   startWatcher();
+
+  // Dev smoke test: HIPOTEZ_SMOKE=<dir> walks every page, saves screenshots
+  // into <dir> and quits. Never active in normal runs.
+  if (process.env.HIPOTEZ_SMOKE) {
+    const outDir = process.env.HIPOTEZ_SMOKE;
+    mainWindow.webContents.once('did-finish-load', async () => {
+      try {
+        await new Promise((r) => setTimeout(r, 1200));
+        for (const pg of ['research', 'courses', 'advising', 'refereeing', 'archive']) {
+          await mainWindow.webContents.executeJavaScript(
+            `(() => { const b = document.querySelector('.nav-btn[data-page="${pg}"]'); if (b) b.click(); })()`
+          );
+          await new Promise((r) => setTimeout(r, 500));
+          const img = await mainWindow.webContents.capturePage();
+          fs.writeFileSync(path.join(outDir, `smoke-${pg}.png`), img.toPNG());
+        }
+        if (process.env.HIPOTEZ_SMOKE_DEEP) {
+          const shot = async (name) => {
+            await new Promise((r) => setTimeout(r, 600));
+            const img = await mainWindow.webContents.capturePage();
+            fs.writeFileSync(path.join(outDir, `deep-${name}.png`), img.toPNG());
+          };
+          const js = (code) => mainWindow.webContents.executeJavaScript(code, true);
+          await js(`switchPage('research')`);
+          await js(`archiveCard('c1', 'research', 'published')`);
+          await js(`switchPage('archive')`);
+          await shot('archive-published');
+          await js(`restoreCard('c1')`);
+          await js(`switchPage('research')`);
+          await shot('after-restore');
+          await js(`openWhiteboard('a1')`);
+          await shot('whiteboard');
+          await js(`closeWhiteboard()`);
+        }
+      } catch (e) {
+        console.error('smoke failed:', e);
+      }
+      app.quit();
+    });
+  }
 });
 
 app.on('window-all-closed', () => {
@@ -187,6 +344,47 @@ ipcMain.handle('settings:save', (_e, data) => {
 
 // ---------- IPC: folder/external ----------
 
+// Google Drive (and similar) mounts can get a different drive letter on each
+// PC. When a stored path's drive doesn't resolve, probe the other drives for
+// the same remainder path and remember the mapping locally (sync-config.json
+// lives in userData and is never synced between machines).
+function resolveFolderPath(p) {
+  if (!p) return null;
+  try {
+    if (fs.existsSync(p)) return p;
+  } catch {
+    return null;
+  }
+  const m = /^([A-Za-z]):([\\/].*)$/.exec(p);
+  if (!m) return null;
+  const origLetter = m[1].toUpperCase();
+  const rest = m[2];
+  const cfg = getSyncConfig();
+  const driveMap = cfg.driveMap || {};
+
+  // 1) Known local mapping first
+  const mapped = driveMap[origLetter];
+  if (mapped) {
+    const candidate = mapped + ':' + rest;
+    if (fs.existsSync(candidate)) return candidate;
+  }
+
+  // 2) Probe all present drives for the same remainder path
+  for (let c = 65; c <= 90; c++) {
+    const letter = String.fromCharCode(c);
+    if (letter === origLetter) continue;
+    const candidate = letter + ':' + rest;
+    try {
+      if (fs.existsSync(letter + ':\\') && fs.existsSync(candidate)) {
+        cfg.driveMap = Object.assign({}, driveMap, { [origLetter]: letter });
+        setSyncConfig(cfg);
+        return candidate;
+      }
+    } catch {}
+  }
+  return null;
+}
+
 ipcMain.handle('folder:pick', async () => {
   const res = await dialog.showOpenDialog(mainWindow, {
     properties: ['openDirectory']
@@ -196,19 +394,15 @@ ipcMain.handle('folder:pick', async () => {
 });
 
 ipcMain.handle('folder:open', async (_e, p) => {
-  if (!p) return false;
-  try {
-    if (!fs.existsSync(p)) return false;
-  } catch (_) {
-    return false;
-  }
+  const resolved = resolveFolderPath(p);
+  if (!resolved) return false;
   // On Windows, shell.openPath can launch Explorer in "explore" mode which
   // forces the navigation pane to appear regardless of the user's global
   // "Show navigation pane" setting. Spawning explorer.exe directly with just
   // the folder path opens it in normal mode and respects the user's setting.
   if (process.platform === 'win32') {
     try {
-      const child = spawn('explorer.exe', [path.normalize(p)], {
+      const child = spawn('explorer.exe', [path.normalize(resolved)], {
         detached: true,
         stdio: 'ignore'
       });
@@ -218,12 +412,13 @@ ipcMain.handle('folder:open', async (_e, p) => {
       // fall through to shell.openPath as a last resort
     }
   }
-  const err = await shell.openPath(p);
+  const err = await shell.openPath(resolved);
   return err === '';
 });
 
 ipcMain.handle('external:open', async (_e, url) => {
   if (!url) return false;
+  if (!/^https?:\/\//i.test(url)) return false;
   await shell.openExternal(url);
   return true;
 });
@@ -257,8 +452,8 @@ ipcMain.handle('sync:pickDataFolder', async () => {
   const tgtProjects = readJson(tgtProjectsFile, null);
   const tgtSettings = readJson(tgtSettingsFile, null);
 
-  const tgtHas = tgtProjects && !isEmptyProjects(tgtProjects);
-  const curHas = !isEmptyProjects(curProjects);
+  const tgtHas = tgtProjects && hasAnyCards(tgtProjects);
+  const curHas = hasAnyCards(curProjects);
 
   let decision = 'seed'; // default: seed cloud from current
 
@@ -295,13 +490,17 @@ ipcMain.handle('sync:pickDataFolder', async () => {
   // else useRemote: leave target alone
 
   // Switch
-  setSyncConfig({ dataFolder: chosen });
+  const cfg = getSyncConfig();
+  cfg.dataFolder = chosen;
+  setSyncConfig(cfg);
   startWatcher();
   return { cancelled: false, folder: chosen };
 });
 
 ipcMain.handle('sync:clearDataFolder', async () => {
-  setSyncConfig({ dataFolder: null });
+  const cfg = getSyncConfig();
+  cfg.dataFolder = null;
+  setSyncConfig(cfg);
   startWatcher();
   return true;
 });
@@ -319,42 +518,36 @@ ipcMain.handle('data:export', async () => {
 
   const payload = {
     app: 'Hipotez',
-    schema: 1,
+    schema: 3,
     exportedAt: new Date().toISOString(),
     projects: readJson(projectsPath(), DEFAULT_PROJECTS),
     settings: readJson(settingsPath(), DEFAULT_SETTINGS)
   };
-  fs.writeFileSync(res.filePath, JSON.stringify(payload, null, 2), 'utf-8');
+  const tmp = res.filePath + '.tmp';
+  fs.writeFileSync(tmp, JSON.stringify(payload, null, 2), 'utf-8');
+  fs.renameSync(tmp, res.filePath);
   return { cancelled: false, path: res.filePath };
 });
 
 function collectDriveLetters(projects) {
   const letters = new Set();
-  const sections = ['ongoing', 'future', 'completed'];
-  for (const sec of sections) {
-    if (!Array.isArray(projects[sec])) continue;
-    for (const p of projects[sec]) {
-      if (p.folder && /^[A-Za-z]:[\\/]/.test(p.folder)) {
-        letters.add(p.folder[0].toUpperCase());
-      }
+  forEachCard(projects, (p) => {
+    if (p.folder && /^[A-Za-z]:[\\/]/.test(p.folder)) {
+      letters.add(p.folder[0].toUpperCase());
     }
-  }
+  });
   return letters;
 }
 
 function remapDriveLetters(projects, mapping) {
-  const sections = ['ongoing', 'future', 'completed'];
-  for (const sec of sections) {
-    if (!Array.isArray(projects[sec])) continue;
-    for (const p of projects[sec]) {
-      if (p.folder && /^[A-Za-z]:[\\/]/.test(p.folder)) {
-        const oldLetter = p.folder[0].toUpperCase();
-        if (mapping[oldLetter]) {
-          p.folder = mapping[oldLetter] + p.folder.substring(1);
-        }
+  forEachCard(projects, (p) => {
+    if (p.folder && /^[A-Za-z]:[\\/]/.test(p.folder)) {
+      const oldLetter = p.folder[0].toUpperCase();
+      if (mapping[oldLetter]) {
+        p.folder = mapping[oldLetter] + p.folder.substring(1);
       }
     }
-  }
+  });
   return projects;
 }
 
@@ -382,7 +575,8 @@ ipcMain.handle('data:import', async () => {
     title: 'İçe aktar',
     message: 'Mevcut veriler bu yedekle değiştirilsin mi?',
     detail:
-      'Bu işlem, uygulamadaki tüm projeleri ve ayarları seçtiğin dosyadakiyle değiştirir. Geri alınamaz.',
+      'Bu işlem, uygulamadaki tüm projeleri ve ayarları seçtiğin dosyadakiyle değiştirir. ' +
+      'Mevcut verinin bir yedeği otomatik olarak "backups" klasörüne alınacak.',
     buttons: ['Değiştir', 'İptal'],
     defaultId: 1,
     cancelId: 1
@@ -404,7 +598,7 @@ ipcMain.handle('data:import', async () => {
         type: 'question',
         title: 'Sürücü harfi uyumsuzluğu',
         message: `Yedekteki bazı klasör yolları bu bilgisayarda bulunamayan sürücü harfleri içeriyor: ${brokenLetters.join(', ')}`,
-        detail: 'Sürücü harflerini bu bilgisayara uygun şekilde güncellemek ister misiniz?',
+        detail: 'Sürücü harflerini bu bilgisayara uygun şekilde güncellemek ister misiniz? (Güncellemeseniz bile uygulama, klasör açılırken doğru sürücüyü otomatik bulmaya çalışır.)',
         buttons: ['Güncelle', 'Olduğu gibi bırak'],
         defaultId: 0,
         cancelId: 1
@@ -430,6 +624,7 @@ ipcMain.handle('data:import', async () => {
     }
   }
 
+  backupProjects('pre-import');
   writeJson(projectsPath(), payload.projects);
   if (payload.settings) writeJson(settingsPath(), payload.settings);
 
