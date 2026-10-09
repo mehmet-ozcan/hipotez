@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('api', {
   saveSettings: (data) => ipcRenderer.invoke('settings:save', data),
   pickFolder: () => ipcRenderer.invoke('folder:pick'),
   openFolder: (p) => ipcRenderer.invoke('folder:open', p),
+  relinkFolder: (p) => ipcRenderer.invoke('folder:relink', p),
   openExternal: (url) => ipcRenderer.invoke('external:open', url),
 
   // Sync

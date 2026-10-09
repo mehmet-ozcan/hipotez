@@ -49,6 +49,7 @@ const I18N = {
     openFolder: 'Klasörü Aç',
     noFolder: 'Klasör yok',
     folderNotFound: 'Bu klasör yolu bulunamadı. Diğer sürücüler de tarandı ancak eşleşen klasör yok.',
+    folderRelinkAsk: 'Bu klasör bu bilgisayarda otomatik bulunamadı. Klasörün bu bilgisayardaki yerini elle göstermek ister misiniz? (Seçiminiz hatırlanır ve benzer klasörler de otomatik eşleştirilir.)',
     settingsFont: 'Yazı Boyutu',
     settingsBg: 'Arka Plan Rengi',
     settingsLang: 'Dil',
@@ -192,6 +193,7 @@ const I18N = {
     openFolder: 'Open Folder',
     noFolder: 'No folder',
     folderNotFound: 'This folder path was not found. Other drives were also scanned, but no match exists.',
+    folderRelinkAsk: 'This folder could not be located automatically on this PC. Would you like to point to it manually? (Your choice is remembered, and similar folders are matched automatically too.)',
     settingsFont: 'Font Size',
     settingsBg: 'Background Color',
     settingsLang: 'Language',
@@ -958,7 +960,16 @@ function makeFolderBtn(p, compact) {
         e.stopPropagation();
         if (!p.folder) return;
         const ok = await window.api.openFolder(p.folder);
-        if (!ok) alert(t('folderNotFound'));
+        if (!ok) {
+          // Auto-resolution failed — offer a one-time manual relink that the
+          // app remembers (and generalizes to sibling folders).
+          if (confirm(t('folderRelinkAsk'))) {
+            const r = await window.api.relinkFolder(p.folder);
+            if (!r || r.cancelled) return;
+          } else {
+            alert(t('folderNotFound'));
+          }
+        }
       }
     },
     folderIconSvg(),

@@ -1,6 +1,6 @@
 {
   "name": "hipotez",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Academic project planner — Hipotez",
   "main": "main.js",
   "author": {
@@ -26,7 +26,8 @@
   ],
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --win --x64"
+    "dist": "electron-builder --win --x64",
+    "mcp": "node mcp-server/hipotez-mcp.js"
   },
   "devDependencies": {
     "electron": "^33.0.0",

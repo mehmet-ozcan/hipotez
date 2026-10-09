@@ -344,45 +344,189 @@ ipcMain.handle('settings:save', (_e, data) => {
 
 // ---------- IPC: folder/external ----------
 
-// Google Drive (and similar) mounts can get a different drive letter on each
-// PC. When a stored path's drive doesn't resolve, probe the other drives for
-// the same remainder path and remember the mapping locally (sync-config.json
-// lives in userData and is never synced between machines).
-function resolveFolderPath(p) {
-  if (!p) return null;
-  try {
-    if (fs.existsSync(p)) return p;
-  } catch {
-    return null;
-  }
-  const m = /^([A-Za-z]):([\\/].*)$/.exec(p);
-  if (!m) return null;
-  const origLetter = m[1].toUpperCase();
-  const rest = m[2];
-  const cfg = getSyncConfig();
-  const driveMap = cfg.driveMap || {};
+// Google Drive / OneDrive / Dropbox (and similar) mounts can get a different
+// drive letter — or an entirely different base path — on each PC. When a stored
+// path doesn't resolve, we try, in order: a remembered exact mapping, a learned
+// prefix mapping (e.g. "G:\My Drive" -> "C:\Users\me\Google Drive"), a drive
+// letter swap, and finally a suffix search that looks for the deepest matching
+// tail of the path under the synced data folder's ancestors and every drive
+// root. Discovered mappings are cached in sync-config.json, which lives in
+// userData and is never synced between machines.
 
-  // 1) Known local mapping first
-  const mapped = driveMap[origLetter];
-  if (mapped) {
-    const candidate = mapped + ':' + rest;
-    if (fs.existsSync(candidate)) return candidate;
-  }
+function safeExists(p) {
+  try { return !!p && fs.existsSync(p); } catch { return false; }
+}
 
-  // 2) Probe all present drives for the same remainder path
+// Split a path into its named folder segments, dropping the drive-letter
+// ("D:") or the leading UNC "\\server\share" tokens so only folder names
+// remain. "G:\My Drive\Proj" -> ["My Drive", "Proj"].
+function pathSegments(p) {
+  if (!p) return [];
+  let rest;
+  const unc = /^\\\\[^\\]+\\[^\\]+(.*)$/.exec(p);
+  if (unc) rest = unc[1];
+  else rest = p.replace(/^[A-Za-z]:/, '');
+  return rest.split(/[\\/]+/).filter(Boolean);
+}
+
+// Remove `count` trailing folder segments from a path, returning the prefix.
+function stripTailSegments(p, count) {
+  let s = p;
+  for (let i = 0; i < count; i++) {
+    s = s.replace(/[\\/]+$/, '');
+    const idx = Math.max(s.lastIndexOf('\\'), s.lastIndexOf('/'));
+    if (idx < 0) { s = ''; break; }
+    s = s.slice(0, idx);
+  }
+  return s.replace(/[\\/]+$/, '');
+}
+
+// Ordered directories to search a path's tail under: the data folder and each
+// of its ancestors (most specific first), then every present drive root.
+function candidateRoots(cfg) {
+  const roots = [];
+  const seen = new Set();
+  const push = (dir) => {
+    const key = (dir || '').toLowerCase();
+    if (dir && !seen.has(key)) { seen.add(key); roots.push(dir); }
+  };
+  if (cfg.dataFolder && safeExists(cfg.dataFolder)) {
+    let cur = cfg.dataFolder;
+    while (cur) {
+      push(cur);
+      const parent = path.dirname(cur);
+      if (!parent || parent === cur) break;
+      cur = parent;
+    }
+  }
   for (let c = 65; c <= 90; c++) {
-    const letter = String.fromCharCode(c);
-    if (letter === origLetter) continue;
-    const candidate = letter + ':' + rest;
-    try {
-      if (fs.existsSync(letter + ':\\') && fs.existsSync(candidate)) {
-        cfg.driveMap = Object.assign({}, driveMap, { [origLetter]: letter });
-        setSyncConfig(cfg);
-        return candidate;
-      }
-    } catch {}
+    const r = String.fromCharCode(c) + ':\\';
+    if (safeExists(r)) push(r);
+  }
+  return roots;
+}
+
+// Apply a learned prefix mapping. Prefix segments are compared without the
+// drive letter, so "My Drive\Proj" matches regardless of which letter the
+// cloud folder got mounted on.
+function applyPrefixMap(p, cfg) {
+  const prefixMap = cfg.prefixMap || {};
+  const segs = pathSegments(p);
+  for (const oldPrefix of Object.keys(prefixMap)) {
+    const op = pathSegments(oldPrefix);
+    if (segs.length < op.length) continue;
+    let match = true;
+    for (let i = 0; i < op.length; i++) {
+      if (segs[i].toLowerCase() !== op[i].toLowerCase()) { match = false; break; }
+    }
+    if (!match) continue;
+    const candidate = path.join(prefixMap[oldPrefix], ...segs.slice(op.length));
+    if (safeExists(candidate)) return candidate;
   }
   return null;
+}
+
+// Locate the deepest trailing sub-path of `p` under any candidate root. A
+// single-segment tail is accepted only when the original path itself had a
+// single segment, so we never grab an unrelated folder that happens to share
+// a leaf name.
+function resolveBySuffix(p, cfg) {
+  const segs = pathSegments(p);
+  if (segs.length === 0) return null;
+  const minTail = segs.length === 1 ? 1 : 2;
+  for (const root of candidateRoots(cfg)) {
+    for (let start = 0; start + minTail <= segs.length; start++) {
+      const candidate = path.join(root, ...segs.slice(start));
+      if (safeExists(candidate)) return candidate;
+    }
+  }
+  return null;
+}
+
+function resolveFolderPath(p) {
+  if (!p) return null;
+  if (safeExists(p)) return p;
+
+  const cfg = getSyncConfig();
+  let resolved = null;
+
+  // 1) Remembered exact mapping (from a previous relink/resolution)
+  const pathMap = cfg.pathMap || {};
+  if (pathMap[p] && safeExists(pathMap[p])) resolved = pathMap[p];
+
+  // 2) Learned prefix mapping (e.g. "G:\My Drive" -> "C:\Users\me\Google Drive")
+  if (!resolved) resolved = applyPrefixMap(p, cfg);
+
+  const m = /^([A-Za-z]):([\\/].*)$/.exec(p);
+  if (!resolved && m) {
+    const origLetter = m[1].toUpperCase();
+    const rest = m[2];
+    const driveMap = cfg.driveMap || {};
+
+    // 3) Known drive-letter mapping first
+    const mapped = driveMap[origLetter];
+    if (mapped && safeExists(mapped + ':' + rest)) {
+      resolved = mapped + ':' + rest;
+    }
+
+    // 4) Probe all present drives for the same remainder path
+    if (!resolved) {
+      for (let c = 65; c <= 90; c++) {
+        const letter = String.fromCharCode(c);
+        if (letter === origLetter) continue;
+        const candidate = letter + ':' + rest;
+        if (safeExists(letter + ':\\') && safeExists(candidate)) {
+          cfg.driveMap = Object.assign({}, driveMap, { [origLetter]: letter });
+          resolved = candidate;
+          break;
+        }
+      }
+    }
+  }
+
+  // 5) Suffix search (cloud folder mounted at a different base path per PC)
+  if (!resolved) resolved = resolveBySuffix(p, cfg);
+
+  if (resolved && resolved !== pathMap[p]) {
+    cfg.pathMap = Object.assign({}, cfg.pathMap || {}, { [p]: resolved });
+  }
+  if (resolved) setSyncConfig(cfg);
+  return resolved;
+}
+
+// Remember how a missing path maps to the folder the user picked, and learn a
+// reusable prefix (or drive-letter) mapping so sibling folders under the same
+// old root resolve automatically next time.
+function learnFolderMapping(oldPath, newPath) {
+  if (!oldPath || !newPath) return;
+  const cfg = getSyncConfig();
+  cfg.pathMap = Object.assign({}, cfg.pathMap || {}, { [oldPath]: newPath });
+
+  const o = pathSegments(oldPath);
+  const n = pathSegments(newPath);
+  let common = 0;
+  while (
+    common < o.length && common < n.length &&
+    o[o.length - 1 - common].toLowerCase() === n[n.length - 1 - common].toLowerCase()
+  ) {
+    common++;
+  }
+  const oldPrefix = stripTailSegments(oldPath, common);
+  const newPrefix = stripTailSegments(newPath, common);
+  const oldLetter = /^([A-Za-z]):/.exec(oldPath);
+  const newLetter = /^([A-Za-z]):/.exec(newPath);
+
+  if (pathSegments(oldPrefix).length === 0) {
+    // Only the drive letter differs — record a letter mapping.
+    if (oldLetter && newLetter) {
+      cfg.driveMap = Object.assign({}, cfg.driveMap || {}, {
+        [oldLetter[1].toUpperCase()]: newLetter[1].toUpperCase()
+      });
+    }
+  } else if (common > 0 && newPrefix) {
+    cfg.prefixMap = Object.assign({}, cfg.prefixMap || {}, { [oldPrefix]: newPrefix });
+  }
+  setSyncConfig(cfg);
 }
 
 ipcMain.handle('folder:pick', async () => {
@@ -414,6 +558,32 @@ ipcMain.handle('folder:open', async (_e, p) => {
   }
   const err = await shell.openPath(resolved);
   return err === '';
+});
+
+// User manually points at the real location of a folder whose stored path no
+// longer resolves on this PC. We remember it (and learn a prefix mapping) and
+// open it straight away.
+ipcMain.handle('folder:relink', async (_e, oldPath) => {
+  const res = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openDirectory'],
+    title: 'Bu kartın klasörünü bu bilgisayarda seç',
+    buttonLabel: 'Klasörü bağla'
+  });
+  if (res.canceled || res.filePaths.length === 0) return { cancelled: true };
+  const chosen = res.filePaths[0];
+  learnFolderMapping(oldPath, chosen);
+  if (process.platform === 'win32') {
+    try {
+      const child = spawn('explorer.exe', [path.normalize(chosen)], {
+        detached: true,
+        stdio: 'ignore'
+      });
+      child.unref();
+      return { cancelled: false, path: chosen };
+    } catch (e) {}
+  }
+  await shell.openPath(chosen);
+  return { cancelled: false, path: chosen };
 });
 
 ipcMain.handle('external:open', async (_e, url) => {
