@@ -60,6 +60,42 @@ function settingsPath() {
   return path.join(dataDir(), 'settings.json');
 }
 
+// Guard against the data folder being (mis)pointed at a Hipotez "backups"
+// subfolder. That mistake — usually from picking the wrong folder in the sync
+// dialog — splits data across nested projects.json files (…/backups/backups/…)
+// and makes newly added cards look like they vanished. Given such a path,
+// return the real data folder above the trailing "backups" segment(s); null if
+// the path doesn't look like that mistake.
+function realDataFolderFrom(p) {
+  if (!p) return null;
+  let cur = p;
+  let stripped = false;
+  while (path.basename(cur).toLowerCase() === 'backups') {
+    const parent = path.dirname(cur);
+    if (!parent || parent === cur) break;
+    cur = parent;
+    stripped = true;
+  }
+  if (stripped && safeExists(path.join(cur, 'projects.json'))) return cur;
+  return null;
+}
+
+// Auto-correct a data folder that got nested into a backups subfolder. Returns
+// { from, to } if it repaired anything, else null. Runs at startup before any
+// read/write so everything uses the corrected folder.
+function repairNestedDataFolder() {
+  const cfg = getSyncConfig();
+  if (!cfg.dataFolder) return null;
+  const real = realDataFolderFrom(cfg.dataFolder);
+  if (real && path.normalize(real) !== path.normalize(cfg.dataFolder)) {
+    const from = cfg.dataFolder;
+    cfg.dataFolder = real;
+    setSyncConfig(cfg);
+    return { from, to: real };
+  }
+  return null;
+}
+
 // ---------- JSON helpers ----------
 
 function notifyCorrupt(file, backupPath) {
@@ -249,9 +285,29 @@ if (process.platform === 'win32') {
 }
 
 app.whenReady().then(() => {
+  // Repair a data folder nested into a backups subfolder BEFORE any read/write,
+  // so the start backup and the first load use the corrected folder.
+  const repairedDataFolder = repairNestedDataFolder();
   backupProjects('start');
   createWindow();
   startWatcher();
+
+  if (repairedDataFolder) {
+    const show = () => dialog.showMessageBox(mainWindow, {
+      type: 'warning',
+      title: 'Veri klasörü düzeltildi',
+      message:
+        'Veri klasörünüz yanlışlıkla bir "backups" (yedek) alt klasörüne ayarlanmıştı. ' +
+        'Bu, eklediğiniz yeni kartların kaybolmuş gibi görünmesine yol açar.',
+      detail:
+        `Otomatik olarak doğru klasöre geri alındı:\n\nEski: ${repairedDataFolder.from}\nYeni: ${repairedDataFolder.to}\n\n` +
+        'Projeleriniz artık bu klasördeki güncel veriden yükleniyor.',
+      buttons: ['Tamam']
+    });
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.once('did-finish-load', show);
+    }
+  }
 
   // Dev smoke test: HIPOTEZ_SMOKE=<dir> walks every page, saves screenshots
   // into <dir> and quits. Never active in normal runs.
@@ -610,7 +666,26 @@ ipcMain.handle('sync:pickDataFolder', async () => {
     title: 'Veri klasörünü seç (ör. Google Drive içinde bir klasör)'
   });
   if (res.canceled || res.filePaths.length === 0) return { cancelled: true };
-  const chosen = res.filePaths[0];
+  let chosen = res.filePaths[0];
+
+  // Guard: don't let the data folder be set to a Hipotez "backups" subfolder —
+  // that splits data across nested files and makes new cards seem to vanish.
+  const realFromChosen = realDataFolderFrom(chosen);
+  if (realFromChosen) {
+    const r = await dialog.showMessageBox(mainWindow, {
+      type: 'warning',
+      title: 'Yanlış klasör seçildi',
+      message: 'Seçtiğiniz klasör bir Hipotez "backups" (yedek) klasörü gibi görünüyor.',
+      detail:
+        'Bunu veri klasörü olarak seçmek verilerinizi böler ve yeni kartların kaybolmuş gibi görünmesine yol açar. ' +
+        `Bunun yerine asıl veri klasörünü kullanmanız önerilir:\n\n${realFromChosen}`,
+      buttons: ['Asıl klasörü kullan (önerilen)', 'İptal'],
+      defaultId: 0,
+      cancelId: 1
+    });
+    if (r.response !== 0) return { cancelled: true };
+    chosen = realFromChosen;
+  }
 
   // Current (possibly local) data
   const curProjects = readJson(projectsPath(), DEFAULT_PROJECTS);
